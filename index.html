@@ -1,0 +1,239 @@
+﻿<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shem HaGdolim Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="top-logos">
+        <img src="logo/light.png" alt="Project logo" class="logo-img" />
+        <img src="logo/Mbz.jpg" alt="Institution logo" class="logo-img" />
+      </div>
+      <h1 id="appTitle" data-i18n="app_title">Shem HaGdolim Research Dashboard</h1>
+      <p id="appSubtitle" data-i18n="app_subtitle">Reports, methods, raw data, networks, personal analysis, geography</p>
+      <p><strong id="selectedEntityTitle" data-i18n="selected_entity">Selected Entity:</strong> <span id="selectedEntityLabel">-</span></p>
+    </div>
+    <div class="topbar-actions">
+      <label class="mode-label" for="dataMode" data-i18n="graph_mode">Graph Mode</label>
+      <select id="dataMode" class="mode-select">
+        <option value="lite" selected>Lite</option>
+        <option value="full">Full</option>
+      </select>
+      <button id="langToggle" class="btn">עברית</button>
+      <button id="saveState" class="btn ghost" data-i18n="copy_link">Copy Share Link</button>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabs" id="tabs"></nav>
+
+    <section class="panel active" id="tab-reports">
+      <article class="card help-card">
+        <h2 data-i18n="reports_title">דוחות + שיטות</h2>
+        <p data-i18n="reports_help">כאן נמצאים הדוחות המחקריים, שיטות המחקר, והסבר על הגרפים המקוריים (F1–F20) עם קישור ישיר לנתונים ולתשאול.</p>
+      </article>
+      <div class="toolbar wrap">
+        <label for="reportSelect" data-i18n="reports_choose">Choose document:</label>
+        <select id="reportSelect"></select>
+        <button class="btn ghost jump-tab" data-tab="data" data-i18n="goto_data">Go To Data+Source</button>
+        <button class="btn ghost jump-tab" data-tab="networks" data-i18n="goto_networks">Go To Networks</button>
+      </div>
+      <div class="grid-two">
+        <article class="card markdown" id="reportContent"></article>
+        <article class="card">
+          <h2 data-i18n="figures_title">Original Figures Explained</h2>
+          <div class="toolbar wrap">
+            <select id="figureSelect"></select>
+          </div>
+          <img id="figurePreview" alt="figure" style="width:100%; border:1px solid #dfe6eb; border-radius:8px;" />
+          <p id="figureExplanation"></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-data">
+      <article class="card help-card">
+        <h2 data-i18n="data_title">נתונים גולמיים + טקסט מקור</h2>
+        <p data-i18n="data_help">חיפוש לפי שם ערך/דמות (לא רק ID), סינון סוגי קודקודים, ולחיצה על "מקור" כדי לראות את הטקסט המקורי.</p>
+      </article>
+      <div class="grid-two">
+        <article class="card">
+          <div class="toolbar wrap">
+            <input id="nodeSearch" type="search" list="nodeNameList" placeholder="חפש לפי שם/ערך" data-i18n-ph="search_node" />
+            <datalist id="nodeNameList"></datalist>
+            <label class="stack-label"><span data-i18n="node_kinds">Node kinds</span><select id="kindFilter" multiple size="3"></select></label>
+            <label class="stack-label"><span data-i18n="node_classes">Node classes</span><select id="fourWayFilter" multiple size="4"></select></label>
+            <label class="stack-label"><span data-i18n="communities">Communities</span><select id="communityFilter" multiple size="4"></select></label>
+            <label><span data-i18n="raw_min_prominence">Min prominence</span><input id="minProm" type="number" min="0" value="0" /></label>
+            <button id="exportNodes" class="btn ghost" data-i18n="export_csv">Export CSV</button>
+          </div>
+          <div id="nodeTableWrap" class="table-wrap"></div>
+        </article>
+        <article class="card">
+          <div class="toolbar wrap">
+            <input id="sourceSearch" placeholder="חפש בטקסט מקור" data-i18n-ph="search_source" />
+            <button id="runSourceSearch" class="btn" data-i18n="search">Search</button>
+          </div>
+          <div id="sourceHits" class="table-wrap"></div>
+          <pre id="sourceContext"></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-networks">
+      <article class="card help-card">
+        <h2 data-i18n="networks_title">רשתות רחבות + חיתוכים</h2>
+        <p data-i18n="networks_help">אפשר לסנן לפי שכבה, סוג קשת, סוג קודקוד מקור/יעד, ולבנות רשת כללית. כולל מדדי רשת, קהילות, וזרימות בין סוגי ישויות.</p>
+      </article>
+      <article class="card">
+        <h3 data-i18n="global_network_title">Global Network (Main Workspace)</h3>
+        <p class="mini-help" data-i18n="global_network_help">התחל כאן: בחר ישות עוגן, פילטרים מרובי-בחירה, ועבור בין צביעות כדי להבין מבנה, קהילות ותפקידי שחקנים.</p>
+        <div class="toolbar wrap">
+          <input id="seedNode" list="nodeNameList" placeholder="Seed node: name or ID" data-i18n-ph="seed_node" />
+          <label class="stack-label"><span data-i18n="layers">Layers</span><select id="networkLayerFilter" multiple size="3"></select></label>
+          <label class="stack-label"><span data-i18n="predicates">Predicates</span><select id="networkPredicateFilter" multiple size="6"></select></label>
+          <label class="stack-label"><span data-i18n="node_kinds">Node kinds</span><select id="networkNodeKindFilter" multiple size="3"></select></label>
+          <select id="networkColorBy">
+            <option value="kind" selected data-i18n="color_kind">Color by Kind</option>
+            <option value="community" data-i18n="color_community">Color by Community</option>
+            <option value="role" data-i18n="color_role">Color by Role</option>
+          </select>
+          <label><span data-i18n="hops">Hops</span> <input id="networkHops" type="number" min="1" max="3" value="1" /></label>
+          <label><span data-i18n="max_edges">Max edges</span> <input id="networkMaxEdges" type="number" min="50" max="6000" value="1200" /></label>
+          <button id="buildNetwork" class="btn" data-i18n="build_global">Build Global Network</button>
+          <button id="downloadGlobalPng" class="btn ghost" data-i18n="download_png">Download PNG</button>
+        </div>
+        <div id="network"></div>
+        <div id="networkInfo"></div>
+        <div id="networkMetrics" class="metrics-grid"></div>
+      </article>
+      <article class="card">
+        <h3 data-i18n="network_functions">Network Functions (How to Use)</h3>
+        <ul class="explain-list" id="networkFunctions"></ul>
+      </article>
+
+      <div class="toolbar wrap">
+        <label class="stack-label"><span data-i18n="layers">Layers</span><select id="layerFilter" multiple size="3"></select></label>
+        <label class="stack-label"><span data-i18n="predicates">Predicates</span><select id="predicateFilter" multiple size="6"></select></label>
+        <label class="stack-label"><span data-i18n="source_kinds">Source kinds</span><select id="sourceKindFilter" multiple size="3"></select></label>
+        <label class="stack-label"><span data-i18n="target_kinds">Target kinds</span><select id="targetKindFilter" multiple size="3"></select></label>
+        <input id="sourceNodeFilter" list="nodeNameList" placeholder="מקור: שם או ID" data-i18n-ph="source_node" />
+        <input id="targetNodeFilter" list="nodeNameList" placeholder="יעד: שם או ID" data-i18n-ph="target_node" />
+        <button id="runEdgeQuery" class="btn" data-i18n="run_query">Run Query</button>
+        <button id="exportEdges" class="btn ghost" data-i18n="export_result">Export Result CSV</button>
+      </div>
+      <div class="grid-two">
+        <article class="card">
+          <div id="edgeStats"></div>
+          <div id="edgeTableWrap" class="table-wrap"></div>
+        </article>
+        <article class="card">
+          <div id="predicateLayerHeat"></div>
+          <div id="flowSankey"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-person">
+      <article class="card help-card">
+        <h2 data-i18n="person_title">רשתות וניתוח אישי של דמויות</h2>
+        <p data-i18n="person_help">רשת אגו, גרף עץ מסורות לפי קריטריון, ומידע תקופתי מ-Wikidata (שנים/תקופה).</p>
+      </article>
+      <div class="toolbar wrap">
+        <input id="personInput" list="nodeNameList" placeholder="בחר דמות/ערך" data-i18n-ph="person_input" />
+        <label class="stack-label"><span data-i18n="tradition_types">Tradition types</span><select id="personTreePredicate" multiple size="4">
+          <option value="teacherOf" selected>teacherOf</option>
+          <option value="soulRootOf">soulRootOf</option>
+          <option value="commentaryOn">commentaryOn</option>
+          <option value="authored">authored</option>
+        </select></label>
+        <select id="personTreeDirection">
+          <option value="out" selected data-i18n="forward">Forward</option>
+          <option value="in" data-i18n="backward">Backward</option>
+          <option value="both" data-i18n="both">Both</option>
+        </select>
+        <select id="personTreeLayout">
+          <option value="breadth" selected data-i18n="layout_tree">Tree layout</option>
+          <option value="radial" data-i18n="layout_radial">Radial layout</option>
+        </select>
+        <label><span data-i18n="depth">Depth</span> <input id="personTreeDepth" type="number" min="1" max="5" value="3" /></label>
+        <label><span data-i18n="fanout">Max children per node</span> <input id="personTreeFanout" type="number" min="2" max="20" value="8" /></label>
+        <button id="analyzePerson" class="btn" data-i18n="analyze_person">Analyze Person</button>
+        <button id="openPersonSource" class="btn ghost" data-i18n="open_source">Open Source Text</button>
+        <button id="downloadTreePng" class="btn ghost" data-i18n="download_tree_png">Download Tree PNG</button>
+      </div>
+      <div class="grid-two">
+        <article class="card">
+          <h2 data-i18n="ego_network">Ego Network</h2>
+          <div id="egoNetwork"></div>
+        </article>
+        <article class="card">
+          <h2 data-i18n="tradition_tree">Tradition Tree</h2>
+          <div id="treeNetwork"></div>
+          <div id="traditionSummary" class="mini-help"></div>
+        </article>
+      </div>
+      <article class="card">
+        <h3 data-i18n="tradition_explain_title">What Tradition Tree Gives You</h3>
+        <div id="traditionExplain" class="mini-help"></div>
+      </article>
+      <div class="grid-two">
+        <article class="card">
+          <h2 data-i18n="person_metrics">Person Metrics</h2>
+          <div id="personStats" class="metrics-grid"></div>
+        </article>
+        <article class="card">
+          <h2 data-i18n="wikidata_title">Wikidata Time/Period</h2>
+          <div id="wikidataBox"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-geo">
+      <article class="card help-card">
+        <h2 data-i18n="geo_title">גיאוגרפיה</h2>
+        <p data-i18n="geo_help">מפת קשרי מקום + פונקציית Network-on-Map שמציירת קישורים בין מקומות לפי רשת סמנטית.</p>
+      </article>
+      <div class="toolbar wrap">
+        <label class="stack-label"><span data-i18n="predicates">Predicates</span><select id="geoPredicateFilter" multiple size="6"></select></label>
+        <label><span data-i18n="heat_radius">Heat radius</span> <input id="heatRadius" type="number" min="5" max="40" value="18" /></label>
+        <label><input type="checkbox" id="geoNetworkOverlay" /> <span data-i18n="overlay_map">Overlay network on map</span></label>
+        <label class="stack-label"><span data-i18n="overlay_predicates">Overlay predicates</span><select id="geoOverlayPredicate" multiple size="6"></select></label>
+        <button id="drawGeo" class="btn" data-i18n="draw_map">Draw Map</button>
+      </div>
+      <div class="grid-two">
+        <article class="card"><div id="geoMap"></div></article>
+        <article class="card"><div id="placeTableWrap" class="table-wrap"></div></article>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-validation">
+      <article class="card">
+        <h2 data-i18n="validation_title">Validation</h2>
+        <button id="runValidation" class="btn" data-i18n="run_validation">Run Validation</button>
+        <div id="validationResult"></div>
+      </article>
+      <article class="card">
+        <h2 data-i18n="extra_visuals">Extra Visualizations From Web Research</h2>
+        <ul id="extraFeatures"></ul>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <small id="footerNote"></small>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
