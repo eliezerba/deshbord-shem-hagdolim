@@ -24,6 +24,8 @@
         <option value="lite" selected>Lite</option>
         <option value="full">Full</option>
       </select>
+      <label><input type="checkbox" id="toggleNodeLabels" checked /> <span data-i18n="show_node_labels">Show node names</span></label>
+      <label><input type="checkbox" id="toggleEdgeLabels" /> <span data-i18n="show_edge_labels">Show edge names</span></label>
       <button id="langToggle" class="btn">עברית</button>
       <button id="saveState" class="btn ghost" data-i18n="copy_link">Copy Share Link</button>
     </div>
@@ -92,17 +94,28 @@
       </article>
       <article class="card">
         <h3 data-i18n="global_network_title">Global Network (Main Workspace)</h3>
-        <p class="mini-help" data-i18n="global_network_help">התחל כאן: בחר ישות עוגן, פילטרים מרובי-בחירה, ועבור בין צביעות כדי להבין מבנה, קהילות ותפקידי שחקנים.</p>
+        <p class="mini-help" data-i18n="global_network_help">כאן רואים את התמונה הרחבה של הרשת. אין חובה לבחור אדם; אפשר לסנן שכבות/קשרים/סוגי קודקודים/קהילות ולבנות מבט-על.</p>
         <div class="toolbar wrap">
-          <input id="seedNode" list="nodeNameList" placeholder="Seed node: name or ID" data-i18n-ph="seed_node" />
+          <input id="seedNode" list="nodeNameList" placeholder="Optional focus node: name or ID" data-i18n-ph="seed_node" />
           <label class="stack-label"><span data-i18n="layers">Layers</span><select id="networkLayerFilter" multiple size="3"></select></label>
           <label class="stack-label"><span data-i18n="predicates">Predicates</span><select id="networkPredicateFilter" multiple size="6"></select></label>
           <label class="stack-label"><span data-i18n="node_kinds">Node kinds</span><select id="networkNodeKindFilter" multiple size="3"></select></label>
-          <select id="networkColorBy">
+          <label class="stack-label"><span data-i18n="analysis_mode">Analysis mode</span><select id="networkColorBy">
             <option value="kind" selected data-i18n="color_kind">Color by Kind</option>
-            <option value="community" data-i18n="color_community">Color by Community</option>
+            <option value="network_communities" data-i18n="color_network_communities">Communities in Network</option>
             <option value="role" data-i18n="color_role">Color by Role</option>
-          </select>
+            <option value="degree" data-i18n="color_degree">Degree centrality</option>
+            <option value="in_degree" data-i18n="color_in_degree">In-degree centrality</option>
+            <option value="out_degree" data-i18n="color_out_degree">Out-degree centrality</option>
+            <option value="weighted_degree" data-i18n="color_weighted_degree">Weighted degree</option>
+            <option value="pagerank" data-i18n="color_pagerank">PageRank</option>
+            <option value="clustering" data-i18n="color_clustering">Clustering coefficient</option>
+          </select></label>
+          <div id="networkCommunityControls" class="community-controls hidden">
+            <label class="stack-label"><span data-i18n="communities">Communities</span><select id="networkCommunityFilter" multiple size="6"></select></label>
+            <label><span data-i18n="community_split_count">Communities to include</span> <input id="networkCommunityCount" type="number" min="1" max="30" value="6" /></label>
+            <label><input type="checkbox" id="networkSeparateCommunities" checked /> <span data-i18n="separate_communities">Visually separate communities</span></label>
+          </div>
           <label><span data-i18n="hops">Hops</span> <input id="networkHops" type="number" min="1" max="3" value="1" /></label>
           <label><span data-i18n="max_edges">Max edges</span> <input id="networkMaxEdges" type="number" min="50" max="6000" value="1200" /></label>
           <button id="buildNetwork" class="btn" data-i18n="build_global">Build Global Network</button>

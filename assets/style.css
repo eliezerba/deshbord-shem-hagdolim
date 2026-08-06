@@ -44,6 +44,7 @@ body { font-family: "Assistant", "Noto Sans Hebrew", "Segoe UI", sans-serif; }
 .topbar h1 { margin: 0 0 .3rem 0; font-size: 1.4rem; }
 .topbar p { margin: .2rem 0; }
 .topbar-actions { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+.topbar-actions label { display: inline-flex; align-items: center; gap: .32rem; font-size: .86rem; }
 .mode-label { font-size: .85rem; }
 
 main { padding: 1rem; max-width: 1600px; margin: 0 auto; }
@@ -89,6 +90,17 @@ main { padding: 1rem; max-width: 1600px; margin: 0 auto; }
 }
 .toolbar.wrap { flex-wrap: wrap; }
 
+.community-controls {
+  display: inline-flex;
+  gap: .55rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.community-controls.hidden {
+  display: none;
+}
+
 .stack-label {
   display: inline-flex;
   flex-direction: column;
@@ -102,6 +114,10 @@ input, select, button {
   padding: .42rem .55rem;
   border-radius: 8px;
   border: 1px solid #c8d2db;
+}
+input[type="checkbox"] {
+  width: auto;
+  padding: 0;
 }
 input:focus, select:focus, button:focus {
   outline: 2px solid #8ecae6;

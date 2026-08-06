@@ -70,17 +70,30 @@ const I18N = {
       search_source: "Search in source text",
       search: "Search",
       networks_title: "Networks + Slicing",
-      networks_help: "The main workspace is the global network. Filter, color, and slice first; then inspect edge analytics below.",
+      networks_help: "This tab opens with a global network overview. Use layers/predicates/node-kinds plus analysis modes and then inspect edge analytics below.",
       global_network_title: "Global Network (Main Workspace)",
-      global_network_help: "Start here: pick a seed entity, use multi-select filters, then switch color modes to inspect structure, communities, and roles.",
-      seed_node: "Seed node: name or ID",
+      global_network_help: "Start with the broad view. Communities are one dedicated mode; selecting it opens community controls.",
+      seed_node: "Optional focus node: name or ID",
       layers: "Layers",
       predicates: "Predicates",
       source_kinds: "Source kinds",
       target_kinds: "Target kinds",
+      community_split_count: "Communities to include",
+      separate_communities: "Visually separate communities",
+      show_node_labels: "Show node names",
+      show_edge_labels: "Show edge names",
+      analysis_mode: "Analysis mode",
       color_kind: "Color by Kind",
       color_community: "Color by Community",
+      color_network_communities: "Communities in Network",
       color_role: "Color by Role",
+      color_degree: "Degree centrality",
+      color_in_degree: "In-degree centrality",
+      color_out_degree: "Out-degree centrality",
+      color_weighted_degree: "Weighted degree",
+      color_pagerank: "PageRank",
+      color_clustering: "Clustering coefficient",
+      metric_top_nodes: "Top nodes by metric",
       hops: "Hops",
       max_edges: "Max edges",
       build_global: "Build Global Network",
@@ -153,17 +166,30 @@ const I18N = {
       search_source: "חפש בטקסט המקור",
       search: "חיפוש",
       networks_title: "רשתות + חיתוכים",
-      networks_help: "המרחב הראשי הוא הרשת הכללית. קודם מפלחים ומשחקים ברשת, ואז יורדים לניתוח קשתות למטה.",
+      networks_help: "הלשונית הזו נפתחת עם מבט-על של רשת כללית. משתמשים בשכבות/סוגי קשר/סוגי קודקודים ומצבי ניתוח, ואז יורדים לניתוח קשתות.",
       global_network_title: "רשת כללית (מרחב עבודה ראשי)",
-      global_network_help: "מתחילים כאן: בוחרים ישות עוגן, מפעילים סינון מרובה, ומחליפים צביעה להבנת מבנה, קהילות ותפקידים.",
-      seed_node: "צומת עוגן: שם או ID",
+      global_network_help: "כאן רואים את התמונה הרחבה של הרשת. קהילות היא אפשרות ייעודית, ורק בבחירה שלה נפתחות בקרות קהילה.",
+      seed_node: "ישות למיקוד (אופציונלי): שם או ID",
       layers: "שכבות",
       predicates: "סוגי קשר (predicates)",
       source_kinds: "סוגי מקור",
       target_kinds: "סוגי יעד",
+      community_split_count: "מספר קהילות להצגה",
+      separate_communities: "הפרדה ויזואלית בין קהילות",
+      show_node_labels: "הצג שמות קודקודים",
+      show_edge_labels: "הצג שמות קשתות",
+      analysis_mode: "מצב ניתוח",
       color_kind: "צביעה לפי סוג",
       color_community: "צביעה לפי קהילה",
+      color_network_communities: "קהילות ברשת",
       color_role: "צביעה לפי תפקיד",
+      color_degree: "מרכזיות דרגה",
+      color_in_degree: "מרכזיות דרגה נכנסת",
+      color_out_degree: "מרכזיות דרגה יוצאת",
+      color_weighted_degree: "דרגה משוקללת",
+      color_pagerank: "PageRank",
+      color_clustering: "מקדם צפיפות מקומי",
+      metric_top_nodes: "צמתים מובילים לפי המדד",
       hops: "קפיצות",
       max_edges: "מקסימום קשתות",
       build_global: "בניית רשת כללית",
@@ -207,7 +233,7 @@ const I18N = {
 
 const APP = {
   lang: "he",
-  activeTab: "reports",
+  activeTab: "networks",
   docs: {},
   sourceText: "",
   sourceLines: [],
@@ -225,6 +251,8 @@ const APP = {
   currentEdgeResult: [],
   selectedNodeId: "",
   activeEdgePredicateTags: new Set(),
+  showNodeLabels: true,
+  showEdgeLabels: false,
   cyGlobal: null,
   cyEgo: null,
   cyTree: null,
@@ -239,9 +267,9 @@ function missingRequiredDomIds() {
   const required = [
     "tabs", "langToggle", "saveState", "reportSelect", "figureSelect", "figurePreview", "figureExplanation",
     "nodeSearch", "kindFilter", "fourWayFilter", "communityFilter", "nodeTableWrap",
-    "network", "seedNode", "networkLayerFilter", "networkPredicateFilter", "buildNetwork",
+    "network", "seedNode", "networkLayerFilter", "networkPredicateFilter", "networkCommunityControls", "networkCommunityFilter", "networkCommunityCount", "networkSeparateCommunities", "buildNetwork",
     "personInput", "analyzePerson", "treeNetwork", "wikidataBox",
-    "geoMap", "drawGeo", "runValidation"
+    "geoMap", "drawGeo", "runValidation", "toggleNodeLabels", "toggleEdgeLabels"
   ];
   return required.filter(id => !document.getElementById(id));
 }
@@ -294,6 +322,71 @@ function kindOf(node) {
   return node?.kind || "unknown";
 }
 
+const KIND_HE = {
+  person: "אדם",
+  book: "ספר",
+  place: "מקום",
+  unknown: "לא ידוע"
+};
+
+const PREDICATE_HE = {
+  teacherOf: "רב של",
+  soulRootOf: "שורש נשמה של",
+  commentaryOn: "פירוש על",
+  authored: "חיבר",
+  cites: "מצטט",
+  citedBy: "מצוטט על ידי",
+  disputes: "חולק על",
+  mentionedIn: "מוזכר ב",
+  bornIn: "נולד ב",
+  diedIn: "נפטר ב",
+  livedIn: "חי ב"
+};
+
+const LAYER_HE = {
+  A: "שכבה A",
+  B: "שכבה B",
+  C: "שכבה C",
+  place: "שכבת מקום",
+  text: "שכבת טקסט",
+  person: "שכבת אנשים"
+};
+
+function humanizeToken(v) {
+  return String(v ?? "")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function localizeKind(v) {
+  const raw = String(v ?? "");
+  if (APP.lang !== "he") return raw;
+  const he = KIND_HE[raw] || `סוג ${raw}`;
+  return he === raw ? he : `${he} (${raw})`;
+}
+
+function localizePredicate(v) {
+  const raw = String(v ?? "");
+  if (APP.lang !== "he") return raw;
+  const he = PREDICATE_HE[raw] || humanizeToken(raw);
+  return he === raw ? he : `${he} (${raw})`;
+}
+
+function localizeLayer(v) {
+  const raw = String(v ?? "");
+  if (APP.lang !== "he") return raw;
+  const he = LAYER_HE[raw] || `שכבה ${humanizeToken(raw)}`;
+  return he === raw ? he : `${he} (${raw})`;
+}
+
+function localizeCommunity(v) {
+  const raw = String(v ?? "");
+  if (APP.lang !== "he") return `Community ${raw}`;
+  return `קהילה ${raw}`;
+}
+
 function selValues(id) {
   return Array.from(document.getElementById(id).selectedOptions).map(o => o.value);
 }
@@ -303,10 +396,48 @@ function isAllSelected(id) {
   return el.selectedOptions.length === el.options.length;
 }
 
-function setMultiOptions(id, values, selectedValues = []) {
+function setMultiOptions(id, values, selectedValues = [], labelFormatter = null) {
   const chosen = new Set(selectedValues);
   const el = document.getElementById(id);
-  el.innerHTML = values.map(v => `<option value="${esc(v)}" ${chosen.size === 0 || chosen.has(String(v)) ? "selected" : ""}>${esc(v)}</option>`).join("");
+  el.innerHTML = values.map(v => {
+    const label = labelFormatter ? labelFormatter(v) : String(v);
+    const selected = chosen.size === 0 || chosen.has(String(v));
+    return `<option value="${esc(v)}" ${selected ? "selected" : ""}>${esc(label)}</option>`;
+  }).join("");
+}
+
+function localizeSingleSelectOptions(selectId, formatter) {
+  const el = document.getElementById(selectId);
+  if (!el) return;
+  Array.from(el.options).forEach(opt => {
+    opt.textContent = formatter(opt.value);
+  });
+}
+
+function relabelFilterOptions() {
+  ["kindFilter", "sourceKindFilter", "targetKindFilter", "networkNodeKindFilter"].forEach(id => {
+    localizeSingleSelectOptions(id, localizeKind);
+  });
+  ["predicateFilter", "networkPredicateFilter", "geoPredicateFilter", "geoOverlayPredicate", "personTreePredicate"].forEach(id => {
+    localizeSingleSelectOptions(id, localizePredicate);
+  });
+  ["layerFilter", "networkLayerFilter"].forEach(id => {
+    localizeSingleSelectOptions(id, localizeLayer);
+  });
+  ["communityFilter", "networkCommunityFilter"].forEach(id => {
+    localizeSingleSelectOptions(id, localizeCommunity);
+  });
+}
+
+function isCommunityMode(mode) {
+  return mode === "network_communities" || mode === "community";
+}
+
+function updateCommunityControlsVisibility() {
+  const mode = document.getElementById("networkColorBy")?.value || "kind";
+  const box = document.getElementById("networkCommunityControls");
+  if (!box) return;
+  box.classList.toggle("hidden", !isCommunityMode(mode));
 }
 
 async function getText(path) {
@@ -423,6 +554,10 @@ function applyLanguage() {
     document.getElementById("saveState").textContent = t("copy_link");
   }
 
+  relabelFilterOptions();
+  updateCommunityControlsVisibility();
+  applyLabelVisibilityToAllGraphs();
+
   buildTabs();
   renderFigurePreview();
   renderNetworkFunctionsHelp();
@@ -482,18 +617,22 @@ function jumpToSourceByNodeId(id) {
 function renderNetworkFunctionsHelp() {
   const rows = APP.lang === "he"
     ? [
-        "בחירת Seed: נקודת כניסה לחקירה. הרשת תיבנה סביב הישות הזו.",
+        "מבט-על כברירת מחדל: אין חובה לבחור אדם או ישות כדי לבנות רשת כללית.",
+        "מיקוד אופציונלי: אם מזינים ישות, היא תסומן ותעזור בהתמצאות בלבד.",
         "Layers/Predicates: חיתוך סמנטי מדויק של סוגי הקשרים.",
         "Node Kinds: בקרה האם להציג אנשים, ספרים, מקומות או שילוב.",
-        "Color by Kind/Community/Role: מעבר בין פירוש טקסונומי, קהילתי ותפקודי.",
+        "מצב ניתוח: קהילה היא אפשרות אחת לצד מדדי רשת (Degree, In/Out Degree, Weighted Degree, PageRank, Clustering).",
+        "אם בוחרים 'קהילות ברשת' נפתחות בקרות קהילה ייעודיות (רשימת קהילות, כמות קהילות, הפרדה חזותית).",
         "Hops + Max edges: איזון בין עומק מחקר לבין עומס ויזואלי.",
         "תגיות predicates מעל טבלת הקשתות הן אינטראקטיביות: לחיצה מפעילה/מכבה חיתוך מיידי."
       ]
     : [
-        "Seed: your entry point. The network is expanded around this entity.",
+        "Global overview is the default: no person/entity input is required.",
+        "Optional focus: if provided, the entity is highlighted for orientation.",
         "Layers/Predicates: semantic slicing over relation families.",
         "Node Kinds: include people, books, places, or any mix.",
-        "Color by Kind/Community/Role: switch between taxonomy, clusters, and function.",
+        "Analysis mode: communities are one option among network metrics (degree, in/out degree, weighted degree, PageRank, clustering).",
+        "Choosing 'Communities in Network' opens dedicated community controls.",
         "Hops + Max edges: tune depth versus visual load.",
         "Predicate tags above edge results are active filters; click to toggle live slicing."
       ];
@@ -576,13 +715,13 @@ function populateFilters() {
   const four = [...new Set(APP.nodes.map(n => n.four_way))].sort();
   const comm = Array.from(new Set(APP.nodes.map(n => String(n.community)))).sort((a, b) => num(a) - num(b));
 
-  setMultiOptions("kindFilter", kinds);
+  setMultiOptions("kindFilter", kinds, [], localizeKind);
   setMultiOptions("fourWayFilter", four);
-  setMultiOptions("communityFilter", comm);
+  setMultiOptions("communityFilter", comm, [], localizeCommunity);
 
-  setMultiOptions("sourceKindFilter", kinds);
-  setMultiOptions("targetKindFilter", kinds);
-  setMultiOptions("networkNodeKindFilter", kinds);
+  setMultiOptions("sourceKindFilter", kinds, [], localizeKind);
+  setMultiOptions("targetKindFilter", kinds, [], localizeKind);
+  setMultiOptions("networkNodeKindFilter", kinds, [], localizeKind);
 }
 
 function filterRawNodes() {
@@ -682,14 +821,17 @@ async function loadGraphIfNeeded(mode = "lite") {
 }
 
 function populateGraphFilters() {
-  setMultiOptions("layerFilter", APP.edgeLayers);
-  setMultiOptions("predicateFilter", APP.edgePredicates);
-  setMultiOptions("networkLayerFilter", APP.edgeLayers);
-  setMultiOptions("networkPredicateFilter", APP.edgePredicates);
+  setMultiOptions("layerFilter", APP.edgeLayers, selValues("layerFilter"), localizeLayer);
+  setMultiOptions("predicateFilter", APP.edgePredicates, selValues("predicateFilter"), localizePredicate);
+  setMultiOptions("networkLayerFilter", APP.edgeLayers, selValues("networkLayerFilter"), localizeLayer);
+  setMultiOptions("networkPredicateFilter", APP.edgePredicates, selValues("networkPredicateFilter"), localizePredicate);
+
+  const communities = Array.from(new Set(APP.gNodes.map(n => String(n.community)).filter(v => v !== ""))).sort((a, b) => num(a) - num(b));
+  setMultiOptions("networkCommunityFilter", communities, selValues("networkCommunityFilter"), localizeCommunity);
 
   const placePreds = [...new Set(APP.gEdges.filter(e => e.subtype === "place").map(e => e.predicate).filter(Boolean))].sort();
-  setMultiOptions("geoPredicateFilter", placePreds);
-  setMultiOptions("geoOverlayPredicate", placePreds);
+  setMultiOptions("geoPredicateFilter", placePreds, selValues("geoPredicateFilter"), localizePredicate);
+  setMultiOptions("geoOverlayPredicate", placePreds, selValues("geoOverlayPredicate"), localizePredicate);
 }
 
 function clearEdgeTagFilters() {
@@ -734,7 +876,7 @@ function runEdgeQuery() {
     .slice(0, 24)
     .map(([k, v]) => {
       const active = APP.activeEdgePredicateTags.has(k) ? "active" : "";
-      return `<button class="pill filter-pill ${active}" data-pred="${esc(k)}">${esc(k)}: ${v}</button>`;
+      return `<button class="pill filter-pill ${active}" data-pred="${esc(k)}">${esc(localizePredicate(k))}: ${v}</button>`;
     })
     .join(" ");
 
@@ -754,7 +896,7 @@ function runEdgeQuery() {
   const head = [...cols, APP.lang === "he" ? "מקור טקסט" : "source text"].map(c => `<th>${esc(c)}</th>`).join("");
   const body = rows.map(r => {
     const s = nodeById(r.source), tNode = nodeById(r.target);
-    return `<tr><td>${esc(r.layer || "")}</td><td>${esc(r.predicate || "")}</td><td>${esc(r.source)}<br/><small>${esc(labelOf(s))}</small></td><td>${esc(r.target)}<br/><small>${esc(labelOf(tNode))}</small></td><td>${esc(r.weight)}</td><td>${esc(r.evidence || "")}</td><td><button class="btn ghost edge-source" data-id="${esc(r.source)}">${APP.lang === "he" ? "מקור" : "Source"}</button></td></tr>`;
+    return `<tr><td>${esc(localizeLayer(r.layer || ""))}</td><td>${esc(localizePredicate(r.predicate || ""))}</td><td>${esc(r.source)}<br/><small>${esc(labelOf(s))}</small></td><td>${esc(r.target)}<br/><small>${esc(labelOf(tNode))}</small></td><td>${esc(r.weight)}</td><td>${esc(r.evidence || "")}</td><td><button class="btn ghost edge-source" data-id="${esc(r.source)}">${APP.lang === "he" ? "מקור" : "Source"}</button></td></tr>`;
   }).join("");
   document.getElementById("edgeTableWrap").innerHTML = `<table class="table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
 
@@ -796,9 +938,9 @@ function renderFlowSankey(edges) {
 
   agg.forEach((v, key) => {
     const [sk, pr, tk] = key.split("||");
-    const a = addLabel(`src:${sk}`);
-    const b = addLabel(`pred:${pr}`);
-    const c = addLabel(`tgt:${tk}`);
+    const a = addLabel(`src:${localizeKind(sk)}`);
+    const b = addLabel(`pred:${localizePredicate(pr)}`);
+    const c = addLabel(`tgt:${localizeKind(tk)}`);
     src.push(a); tgt.push(b); val.push(v);
     src.push(b); tgt.push(c); val.push(v);
   });
@@ -863,6 +1005,92 @@ function subgraphFromSeed(seed, opts) {
   return { cyNodes, cyEdges };
 }
 
+function buildGlobalOverviewSubgraph(opts) {
+  const { layers, predicates, kinds, communityValues, communityCount, maxEdges, focusId, hops } = opts;
+
+  let cand = APP.gEdges.filter(e => {
+    if (layers.length && !layers.includes(e.layer)) return false;
+    if (predicates.length && !predicates.includes(e.predicate)) return false;
+    if (kinds.length) {
+      const sk = kindOf(nodeById(e.source));
+      const tk = kindOf(nodeById(e.target));
+      if (!kinds.includes(sk) || !kinds.includes(tk)) return false;
+    }
+    return true;
+  });
+
+  const commCount = new Map();
+  cand.forEach(e => {
+    const s = String(nodeById(e.source)?.community ?? "");
+    const tNode = String(nodeById(e.target)?.community ?? "");
+    if (s) commCount.set(s, (commCount.get(s) || 0) + 1);
+    if (tNode) commCount.set(tNode, (commCount.get(tNode) || 0) + 1);
+  });
+
+  const rankedCommunities = [...commCount.entries()].sort((a, b) => b[1] - a[1]).map(([c]) => c);
+  const selectedPool = communityValues.length ? rankedCommunities.filter(c => communityValues.includes(c)) : rankedCommunities;
+  const finalCommunities = communityCount > 0 ? selectedPool.slice(0, communityCount) : selectedPool;
+  const communitySet = communityCount > 0 ? new Set(finalCommunities) : new Set();
+
+  if (communitySet.size) {
+    cand = cand.filter(e => {
+      const s = String(nodeById(e.source)?.community ?? "");
+      const tNode = String(nodeById(e.target)?.community ?? "");
+      return communitySet.has(s) && communitySet.has(tNode);
+    });
+  }
+
+  if (focusId) {
+    const adj = new Map();
+    cand.forEach(e => {
+      if (!adj.has(e.source)) adj.set(e.source, []);
+      if (!adj.has(e.target)) adj.set(e.target, []);
+      adj.get(e.source).push(e);
+      adj.get(e.target).push(e);
+    });
+
+    const scope = new Set([focusId]);
+    let frontier = new Set([focusId]);
+    for (let h = 0; h < Math.max(1, hops || 1); h++) {
+      const next = new Set();
+      for (const n of frontier) {
+        (adj.get(n) || []).forEach(e => {
+          const other = e.source === n ? e.target : e.source;
+          if (!scope.has(other)) {
+            scope.add(other);
+            next.add(other);
+          }
+        });
+      }
+      frontier = next;
+      if (!frontier.size) break;
+    }
+
+    cand = cand.filter(e => scope.has(e.source) && scope.has(e.target));
+  }
+
+  cand = [...cand].sort((a, b) => num(b.weight) - num(a.weight)).slice(0, maxEdges);
+
+  const nodes = new Set();
+  cand.forEach(e => {
+    nodes.add(e.source);
+    nodes.add(e.target);
+  });
+
+  const cyNodes = [...nodes].map(id => {
+    const n = nodeById(id) || { id, label: id, kind: "unknown" };
+    return { data: { id, label: labelOf(n), kind: kindOf(n), community: n.community, role: roleOf(n) } };
+  });
+  const cyEdges = cand.map(e => ({ data: { id: e.id, source: e.source, target: e.target, predicate: e.predicate, layer: e.layer } }));
+
+  return {
+    cyNodes,
+    cyEdges,
+    includedCommunities: finalCommunities,
+    availableCommunities: rankedCommunities
+  };
+}
+
 function componentsCount(cyNodes, cyEdges) {
   const ids = new Set(cyNodes.map(n => n.data.id));
   const adj = new Map([...ids].map(id => [id, new Set()]));
@@ -895,6 +1123,148 @@ function componentsCount(cyNodes, cyEdges) {
   return c;
 }
 
+function clamp01(v) {
+  return Math.max(0, Math.min(1, num(v)));
+}
+
+function metricColor(v) {
+  const x = clamp01(v);
+  const r = Math.round(12 + (238 - 12) * x);
+  const g = Math.round(87 + (155 - 87) * x);
+  const b = Math.round(115 + (0 - 115) * x);
+  return `rgb(${r},${g},${b})`;
+}
+
+function isMetricMode(mode) {
+  return ["degree", "in_degree", "out_degree", "weighted_degree", "pagerank", "clustering"].includes(mode);
+}
+
+function normalizeMap(valuesMap) {
+  const vals = [...valuesMap.values()];
+  const min = vals.length ? Math.min(...vals) : 0;
+  const max = vals.length ? Math.max(...vals) : 1;
+  const span = (max - min) || 1;
+  const out = new Map();
+  valuesMap.forEach((v, k) => out.set(k, (num(v) - min) / span));
+  return out;
+}
+
+function computeGlobalNodeMetrics(cyNodes, cyEdges) {
+  const ids = cyNodes.map(n => n.data.id);
+  const idSet = new Set(ids);
+  const inDeg = new Map(ids.map(id => [id, 0]));
+  const outDeg = new Map(ids.map(id => [id, 0]));
+  const weightedDeg = new Map(ids.map(id => [id, 0]));
+  const outWeight = new Map(ids.map(id => [id, 0]));
+  const undirectedAdj = new Map(ids.map(id => [id, new Set()]));
+
+  cyEdges.forEach(e => {
+    const s = e.data.source;
+    const tNode = e.data.target;
+    if (!idSet.has(s) || !idSet.has(tNode)) return;
+    const w = Math.max(0.0001, num(e.data.weight) || 1);
+    outDeg.set(s, (outDeg.get(s) || 0) + 1);
+    inDeg.set(tNode, (inDeg.get(tNode) || 0) + 1);
+    outWeight.set(s, (outWeight.get(s) || 0) + w);
+    weightedDeg.set(s, (weightedDeg.get(s) || 0) + w);
+    weightedDeg.set(tNode, (weightedDeg.get(tNode) || 0) + w);
+    undirectedAdj.get(s).add(tNode);
+    undirectedAdj.get(tNode).add(s);
+  });
+
+  const degree = new Map(ids.map(id => [id, (inDeg.get(id) || 0) + (outDeg.get(id) || 0)]));
+
+  const clustering = new Map();
+  ids.forEach(id => {
+    const neigh = [...(undirectedAdj.get(id) || new Set())];
+    const k = neigh.length;
+    if (k < 2) {
+      clustering.set(id, 0);
+      return;
+    }
+    let links = 0;
+    for (let i = 0; i < k; i++) {
+      for (let j = i + 1; j < k; j++) {
+        const a = neigh[i], b = neigh[j];
+        if ((undirectedAdj.get(a) || new Set()).has(b)) links++;
+      }
+    }
+    clustering.set(id, links / (k * (k - 1) / 2));
+  });
+
+  const n = Math.max(1, ids.length);
+  const d = 0.85;
+  let pr = new Map(ids.map(id => [id, 1 / n]));
+  for (let iter = 0; iter < 36; iter++) {
+    const next = new Map(ids.map(id => [id, (1 - d) / n]));
+    ids.forEach(id => {
+      const outgoing = outWeight.get(id) || 0;
+      if (!outgoing) {
+        const leak = d * (pr.get(id) || 0) / n;
+        ids.forEach(tNode => next.set(tNode, (next.get(tNode) || 0) + leak));
+        return;
+      }
+      const base = d * (pr.get(id) || 0);
+      cyEdges.forEach(e => {
+        if (e.data.source !== id) return;
+        const tNode = e.data.target;
+        if (!idSet.has(tNode)) return;
+        const w = Math.max(0.0001, num(e.data.weight) || 1);
+        next.set(tNode, (next.get(tNode) || 0) + base * (w / outgoing));
+      });
+    });
+    pr = next;
+  }
+
+  return {
+    degree,
+    in_degree: inDeg,
+    out_degree: outDeg,
+    weighted_degree: weightedDeg,
+    pagerank: pr,
+    clustering
+  };
+}
+
+function metricLabel(mode) {
+  if (mode === "degree") return t("color_degree");
+  if (mode === "in_degree") return t("color_in_degree");
+  if (mode === "out_degree") return t("color_out_degree");
+  if (mode === "weighted_degree") return t("color_weighted_degree");
+  if (mode === "pagerank") return t("color_pagerank");
+  if (mode === "clustering") return t("color_clustering");
+  return "";
+}
+
+function applyGlobalAnalysisMetric(graph, mode) {
+  if (!isMetricMode(mode)) {
+    graph.cyNodes.forEach(n => {
+      n.data.metricValue = 0;
+      n.data.metricNorm = 0;
+      n.data.metricName = "";
+    });
+    return { mode, topRows: [] };
+  }
+
+  const metrics = computeGlobalNodeMetrics(graph.cyNodes, graph.cyEdges);
+  const rawMap = metrics[mode] || new Map();
+  const normMap = normalizeMap(rawMap);
+
+  graph.cyNodes.forEach(n => {
+    const id = n.data.id;
+    n.data.metricValue = num(rawMap.get(id));
+    n.data.metricNorm = num(normMap.get(id));
+    n.data.metricName = mode;
+  });
+
+  const topRows = [...rawMap.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([id, v]) => ({ id, label: labelOf(nodeById(id) || { id }), value: v }));
+
+  return { mode, topRows };
+}
+
 function renderMetricsBox(targetId, cyNodes, cyEdges) {
   const n = cyNodes.length;
   const m = cyEdges.length;
@@ -919,19 +1289,88 @@ function renderMetricsBox(targetId, cyNodes, cyEdges) {
   document.getElementById(targetId).innerHTML = cards.map(([k, v]) => `<div class="metric-card"><div class="metric-k">${esc(k)}</div><div class="metric-v">${esc(v)}</div></div>`).join("");
 }
 
-function buildCy(containerId, cyNodes, cyEdges, colorBy = "kind", treeLike = false, target = "global", layoutMode = "breadth") {
+function computeCommunityPresetPositions(cyNodes) {
+  const byCommunity = new Map();
+  cyNodes.forEach(n => {
+    const c = String(n.data.community ?? "unknown");
+    if (!byCommunity.has(c)) byCommunity.set(c, []);
+    byCommunity.get(c).push(n.data.id);
+  });
+
+  const groups = [...byCommunity.entries()].sort((a, b) => b[1].length - a[1].length);
+  const cols = Math.max(1, Math.ceil(Math.sqrt(groups.length)));
+  const spacing = 420;
+  const positions = {};
+
+  groups.forEach(([community, ids], ix) => {
+    const col = ix % cols;
+    const row = Math.floor(ix / cols);
+    const cx = col * spacing;
+    const cy = row * spacing;
+    const radius = Math.max(42, 56 + Math.sqrt(ids.length) * 18);
+
+    if (ids.length === 1) {
+      positions[ids[0]] = { x: cx, y: cy };
+      return;
+    }
+
+    ids.forEach((id, idx) => {
+      const angle = (2 * Math.PI * idx) / ids.length;
+      const tier = 0.68 + ((idx % 5) * 0.08);
+      positions[id] = {
+        x: cx + Math.cos(angle) * radius * tier,
+        y: cy + Math.sin(angle) * radius * tier
+      };
+    });
+  });
+
+  return positions;
+}
+
+function applyLabelVisibilityToCy(cy) {
+  if (!cy) return;
+  cy.style()
+    .selector("node")
+    .style("label", APP.showNodeLabels ? "data(label)" : "")
+    .selector("edge")
+    .style("label", (ele) => APP.showEdgeLabels ? localizePredicate(ele.data("predicate")) : "")
+    .update();
+}
+
+function applyLabelVisibilityToAllGraphs() {
+  applyLabelVisibilityToCy(APP.cyGlobal);
+  applyLabelVisibilityToCy(APP.cyEgo);
+  applyLabelVisibilityToCy(APP.cyTree);
+}
+
+function buildCy(containerId, cyNodes, cyEdges, colorBy = "kind", treeLike = false, target = "global", layoutMode = "breadth", extra = {}) {
   if (target === "global" && APP.cyGlobal) APP.cyGlobal.destroy();
   if (target === "ego" && APP.cyEgo) APP.cyEgo.destroy();
   if (target === "tree" && APP.cyTree) APP.cyTree.destroy();
 
   const nodeStyle = {
-    label: "data(label)",
+    label: APP.showNodeLabels ? "data(label)" : "",
     "font-size": 8,
     "text-wrap": "wrap",
     "text-max-width": 95,
+    width: (ele) => {
+      if (isMetricMode(colorBy)) {
+        return 18 + (clamp01(ele.data("metricNorm")) * 30);
+      }
+      return 24;
+    },
+    height: (ele) => {
+      if (isMetricMode(colorBy)) {
+        return 18 + (clamp01(ele.data("metricNorm")) * 30);
+      }
+      return 24;
+    },
     "background-color": (ele) => {
       const d = ele.data();
-      if (colorBy === "community") return colorByCommunity(d.community);
+      if (isMetricMode(colorBy)) {
+        return metricColor(d.metricNorm);
+      }
+      if (isCommunityMode(colorBy)) return colorByCommunity(d.community);
       if (colorBy === "role") {
         if (d.role === "authority") return "#005f73";
         if (d.role === "compiler") return "#bb3e03";
@@ -955,6 +1394,14 @@ function buildCy(containerId, cyNodes, cyEdges, colorBy = "kind", treeLike = fal
     };
   } else if (treeLike) {
     layout = { name: "breadthfirst", directed: true, padding: 24, animate: false };
+  } else if (extra.separateByCommunity) {
+    const pos = computeCommunityPresetPositions(cyNodes);
+    layout = {
+      name: "preset",
+      fit: true,
+      padding: 28,
+      positions: (node) => pos[node.id()] || { x: 0, y: 0 }
+    };
   } else {
     layout = { name: "cose", animate: false, nodeRepulsion: 6800 };
   }
@@ -964,7 +1411,7 @@ function buildCy(containerId, cyNodes, cyEdges, colorBy = "kind", treeLike = fal
     elements: [...cyNodes, ...cyEdges],
     style: [
       { selector: "node", style: nodeStyle },
-      { selector: "edge", style: { width: 1, "line-color": "#9fb3c8", "curve-style": "bezier", opacity: 0.68, "target-arrow-shape": treeLike ? "triangle" : "none", "target-arrow-color": "#8da8bd" } },
+      { selector: "edge", style: { width: 1, "line-color": "#9fb3c8", "curve-style": "bezier", opacity: 0.68, "target-arrow-shape": treeLike ? "triangle" : "none", "target-arrow-color": "#8da8bd", label: (ele) => APP.showEdgeLabels ? localizePredicate(ele.data("predicate")) : "", "font-size": 7, color: "#24445c", "text-background-color": "#ffffff", "text-background-opacity": 0.85, "text-background-padding": 2 } },
       { selector: ":selected", style: { "background-color": "#ffb703", "line-color": "#ffb703" } }
     ],
     layout
@@ -980,6 +1427,7 @@ function buildCy(containerId, cyNodes, cyEdges, colorBy = "kind", treeLike = fal
   if (target === "global") APP.cyGlobal = cy;
   if (target === "ego") APP.cyEgo = cy;
   if (target === "tree") APP.cyTree = cy;
+  applyLabelVisibilityToCy(cy);
   return cy;
 }
 
@@ -989,31 +1437,63 @@ function getDefaultSeed() {
 }
 
 function buildGlobalNetwork() {
-  let seed = resolveInputToId(document.getElementById("seedNode").value);
-  if (!seed) {
-    seed = getDefaultSeed();
-    document.getElementById("seedNode").value = seed;
-  }
-  if (!seed || !APP.gNodeById.has(seed)) {
-    document.getElementById("networkInfo").innerHTML = `<p class="status-err">${APP.lang === "he" ? "ישות עוגן לא נמצאה." : "Seed node not found."}</p>`;
-    return;
-  }
+  const focusId = resolveInputToId(document.getElementById("seedNode").value);
+  const analysisMode = document.getElementById("networkColorBy").value;
+  const useCommunityMode = isCommunityMode(analysisMode);
+  const communityCount = useCommunityMode ? Math.max(1, Math.min(30, num(document.getElementById("networkCommunityCount").value))) : 0;
 
-  setSelectedNode(seed);
-
-  const graph = subgraphFromSeed(seed, {
+  const graph = buildGlobalOverviewSubgraph({
     layers: selValues("networkLayerFilter"),
     predicates: selValues("networkPredicateFilter"),
     kinds: selValues("networkNodeKindFilter"),
+    communityValues: useCommunityMode ? selValues("networkCommunityFilter") : [],
+    communityCount,
+    focusId: focusId && APP.gNodeById.has(focusId) ? focusId : "",
     hops: Math.max(1, Math.min(3, num(document.getElementById("networkHops").value))),
-    maxEdges: Math.max(50, Math.min(6000, num(document.getElementById("networkMaxEdges").value))),
-    mode: "neighborhood"
+    maxEdges: Math.max(50, Math.min(6000, num(document.getElementById("networkMaxEdges").value)))
   });
 
-  buildCy("network", graph.cyNodes, graph.cyEdges, document.getElementById("networkColorBy").value, false, "global");
+  if (!graph.cyNodes.length) {
+    document.getElementById("networkInfo").innerHTML = `<p class="status-err">${APP.lang === "he" ? "לא נמצאו תוצאות עבור הסינון הנוכחי." : "No graph results for current filters."}</p>`;
+    document.getElementById("networkMetrics").innerHTML = "";
+    if (APP.cyGlobal) {
+      APP.cyGlobal.destroy();
+      APP.cyGlobal = null;
+    }
+    return;
+  }
+
+  if (focusId && APP.gNodeById.has(focusId)) {
+    setSelectedNode(focusId);
+  }
+
+  const metricState = applyGlobalAnalysisMetric(graph, analysisMode);
+
+  buildCy(
+    "network",
+    graph.cyNodes,
+    graph.cyEdges,
+    analysisMode,
+    false,
+    "global",
+    "broad",
+    { separateByCommunity: useCommunityMode && document.getElementById("networkSeparateCommunities").checked }
+  );
+
+  const commText = graph.includedCommunities.map(c => localizeCommunity(c)).join(" | ");
+  const focusText = focusId && APP.gNodeById.has(focusId)
+    ? (APP.lang === "he" ? ` | מיקוד: ${esc(labelOf(nodeById(focusId)))}` : ` | Focus: ${esc(labelOf(nodeById(focusId)))}`)
+    : "";
+  const metricInfo = metricState.topRows.length
+    ? `<p><strong>${esc(t("metric_top_nodes"))} (${esc(metricLabel(metricState.mode))}):</strong> ${metricState.topRows.map(x => `${esc(x.label)} (${num(x.value).toFixed(4)})`).join(" | ")}</p>`
+    : "";
+  const communityInfo = useCommunityMode
+    ? `<p>${APP.lang === "he" ? "קהילות מוצגות" : "Communities shown"}: ${commText || "-"}</p>`
+    : "";
   document.getElementById("networkInfo").innerHTML = APP.lang === "he"
-    ? `<p>רשת כללית סביב ${esc(labelOf(nodeById(seed)))} | צמתים: ${graph.cyNodes.length} | קשתות: ${graph.cyEdges.length}</p>`
-    : `<p>Global network around ${esc(labelOf(nodeById(seed)))} | Nodes: ${graph.cyNodes.length} | Edges: ${graph.cyEdges.length}</p>`;
+    ? `<p>מבט-על לרשת הכללית${focusText} | צמתים: ${graph.cyNodes.length} | קשתות: ${graph.cyEdges.length}</p>${communityInfo}${metricInfo}`
+    : `<p>Global network overview${focusText} | Nodes: ${graph.cyNodes.length} | Edges: ${graph.cyEdges.length}</p>${communityInfo}${metricInfo}`;
+
   renderMetricsBox("networkMetrics", graph.cyNodes, graph.cyEdges);
 }
 
@@ -1094,7 +1574,7 @@ function buildTraditionTree(seed, predicates, direction, depth, fanout) {
 
 function renderTraditionSummary(summary) {
   const levels = Object.entries(summary.levelCounts).sort((a, b) => num(a[0]) - num(b[0])).map(([lvl, c]) => `${APP.lang === "he" ? "עומק" : "Depth"} ${lvl}: ${c}`).join(" | ");
-  const preds = Object.entries(summary.predicateCounts).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, c]) => `${k}: ${c}`).join(" | ");
+  const preds = Object.entries(summary.predicateCounts).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, c]) => `${localizePredicate(k)}: ${c}`).join(" | ");
   document.getElementById("traditionSummary").innerHTML = APP.lang === "he"
     ? `<p><strong>תקציר עץ:</strong> צמתים ${summary.cyNodes.length}, קשתות ${summary.cyEdges.length}</p><p>${levels}</p><p><strong>Predicates מובילים:</strong> ${preds || "-"}</p>`
     : `<p><strong>Tree summary:</strong> nodes ${summary.cyNodes.length}, edges ${summary.cyEdges.length}</p><p>${levels}</p><p><strong>Top predicates:</strong> ${preds || "-"}</p>`;
@@ -1312,7 +1792,21 @@ function hideLoadingOverlay() {
 function showNetworkReadyPrompt() {
   const el = document.getElementById("networkInfo");
   if (!el) return;
-  el.innerHTML = `<p style="color:var(--muted);">${APP.lang === "he" ? "לחץ על \u2018בניית רשת כללית\u2019 כדי לטעון ולהציג את הגרף (5.5MB)." : "Click \u2018Build Global Network\u2019 to load and display the graph (5.5 MB)."}</p>`;
+  el.innerHTML = `<p style="color:var(--muted);">${APP.lang === "he" ? "לחץ על \u2018בניית רשת כללית\u2019 כדי לטעון מבט-על (5.5MB). אפשר לבחור ישות למיקוד, אך זה אופציונלי." : "Click \u2018Build Global Network\u2019 to load the broad overview (5.5 MB). Focus entity is optional."}</p>`;
+}
+
+async function loadInitialGlobalNetwork() {
+  const msg = APP.lang === "he" ? "טוען רשת כללית ראשונית..." : "Loading initial global network...";
+  showLoadingOverlay(msg);
+  try {
+    await loadGraphIfNeeded(document.getElementById("dataMode").value);
+    buildGlobalNetwork();
+  } catch (e) {
+    showNetworkReadyPrompt();
+    document.getElementById("networkInfo").innerHTML += `<p class="status-err">${esc(e?.message || String(e))}</p>`;
+  } finally {
+    hideLoadingOverlay();
+  }
 }
 
 async function runSourceSearch() {
@@ -1452,12 +1946,26 @@ function setExtraFeaturesFromResearch() {
 }
 
 function wireEvents() {
+  document.getElementById("toggleNodeLabels").checked = APP.showNodeLabels;
+  document.getElementById("toggleEdgeLabels").checked = APP.showEdgeLabels;
+  updateCommunityControlsVisibility();
+
   document.getElementById("langToggle").onclick = () => {
     APP.lang = APP.lang === "he" ? "en" : "he";
     APP.wikidataCache.clear();
     applyLanguage();
     populateReportSelector();
     renderNodeTable();
+  };
+
+  document.getElementById("toggleNodeLabels").onchange = (e) => {
+    APP.showNodeLabels = !!e.target.checked;
+    applyLabelVisibilityToAllGraphs();
+  };
+
+  document.getElementById("toggleEdgeLabels").onchange = (e) => {
+    APP.showEdgeLabels = !!e.target.checked;
+    applyLabelVisibilityToAllGraphs();
   };
 
   ["nodeSearch", "kindFilter", "fourWayFilter", "communityFilter", "minProm"].forEach(id => {
@@ -1502,6 +2010,15 @@ function wireEvents() {
       buildGlobalNetwork();
     } finally { hideLoadingOverlay(); }
   };
+
+  ["networkColorBy", "networkSeparateCommunities", "networkCommunityFilter", "networkCommunityCount", "networkHops", "networkLayerFilter", "networkPredicateFilter", "networkNodeKindFilter", "networkMaxEdges"].forEach(id => {
+    const el = document.getElementById(id);
+    const evt = el.tagName === "INPUT" ? "input" : "change";
+    el.addEventListener(evt, () => {
+      if (id === "networkColorBy") updateCommunityControlsVisibility();
+      if (APP.gLoaded && APP.cyGlobal) buildGlobalNetwork();
+    });
+  });
 
   document.getElementById("downloadGlobalPng").onclick = () => {
     downloadCyPng(APP.cyGlobal, "global_network.png");
@@ -1588,7 +2105,7 @@ async function init() {
   wireEvents();
   activateTab(APP.activeTab);
   setStatus();
-  showNetworkReadyPrompt();
+  await loadInitialGlobalNetwork();
 }
 
 init().catch(err => {
