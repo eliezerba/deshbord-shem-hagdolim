@@ -12,6 +12,17 @@
   graphLite: "data/graph/graph_lite.json"
 };
 
+const BUILD_VERSION = (typeof window !== "undefined" && window.__BUILD_VERSION__ && window.__BUILD_VERSION__ !== "__BUILD_VERSION__")
+  ? String(window.__BUILD_VERSION__)
+  : "dev";
+
+function withBuildVersion(path) {
+  if (typeof path !== "string") return path;
+  if (/^https?:\/\//i.test(path)) return path;
+  const sep = path.includes("?") ? "&" : "?";
+  return `${path}${sep}v=${encodeURIComponent(BUILD_VERSION)}`;
+}
+
 const FIGURES = {
   F1: { file: "F1_bookshelf_map.png", en: "Global bookshelf topology; who is structurally central.", he: "טופולוגיית מדף הספרים: מי נמצא במרכז המבני." },
   F2: { file: "F2_role_typology.png", en: "Role typology (authority/compiler/balanced).", he: "טיפולוגיית תפקידים: סמכות/מלקט/מאוזן." },
@@ -682,7 +693,7 @@ function setNetworkFullscreenButtonLabel() {
 }
 
 async function getText(path) {
-  const r = await fetch(path);
+  const r = await fetch(withBuildVersion(path));
   if (!r.ok) throw new Error(`Fetch failed ${path}: ${r.status}`);
   return r.text();
 }
@@ -2634,7 +2645,7 @@ async function runValidation() {
   checks.push(["Data dictionary", !!APP.docs.dataDictionary]);
   checks.push(["Graph summary", !!APP.docs.graphSummary]);
   // Source text is lazy-loaded; verify reachability with a partial GET
-  const srcOk = await fetch(DATA_PATHS.sourceText).then(r => r.ok).catch(() => false);
+  const srcOk = await fetch(withBuildVersion(DATA_PATHS.sourceText)).then(r => r.ok).catch(() => false);
   checks.push(["Source text (reachable)", srcOk]);
   checks.push(["Node metrics rows == 5128", APP.nodes.length === 5128]);
 
@@ -2643,12 +2654,12 @@ async function runValidation() {
   checks.push(["Lite graph edges > 10000", APP.gEdges.length > 10000]);
 
   // Verify full GEXF is reachable without downloading 57MB
-  const gexfOk = await fetch(DATA_PATHS.gexf).then(r => r.ok).catch(() => false);
+  const gexfOk = await fetch(withBuildVersion(DATA_PATHS.gexf)).then(r => r.ok).catch(() => false);
   checks.push(["Full GEXF reachable (57MB, not downloaded)", gexfOk]);
 
   const figOk = await Promise.all(Object.values(FIGURES).map(async f => {
     try {
-      const r = await fetch(`data/figures/${f.file}`);
+      const r = await fetch(withBuildVersion(`data/figures/${f.file}`));
       return r.ok;
     } catch {
       return false;
