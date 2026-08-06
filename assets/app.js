@@ -53,6 +53,8 @@ const I18N = {
       graph_mode: "Graph Mode",
       copy_link: "Copy Share Link",
       copied: "Copied",
+      info_title: "Info",
+      close: "Close",
       reports_title: "Reports + Methods",
       reports_help: "Research reports, methods, and original figure explanations (F1-F20) with direct links to data and query workflows.",
       reports_choose: "Choose document:",
@@ -78,8 +80,13 @@ const I18N = {
       predicates: "Predicates",
       source_kinds: "Source kinds",
       target_kinds: "Target kinds",
-      community_split_count: "Communities to include",
+      community_split_count: "Communities to compute (K)",
       separate_communities: "Visually separate communities",
+      layout_mode: "Layout",
+      layout_force: "Force (organic)",
+      layout_degree_rings: "Degree rings (20/20/core)",
+      layout_bipartite: "Bipartite (books/people)",
+      layout_community_clusters: "Community clusters",
       show_node_labels: "Show node names",
       show_edge_labels: "Show edge names",
       analysis_mode: "Analysis mode",
@@ -97,6 +104,8 @@ const I18N = {
       hops: "Hops",
       max_edges: "Max edges",
       build_global: "Build Global Network",
+      maximize_graph: "Maximize Graph",
+      minimize_graph: "Exit Fullscreen",
       download_png: "Download PNG",
       network_functions: "Network Functions (How to Use)",
       source_node: "Source: name or ID",
@@ -123,10 +132,13 @@ const I18N = {
       person_metrics: "Person Metrics",
       wikidata_title: "Wikidata Time/Period",
       geo_title: "Geography",
-      geo_help: "Place relations map with optional network-on-map overlay between places.",
+      geo_help: "Place relations map with optional network-on-map overlay between places. Overlay predicates are shown only when overlay is enabled; linked records panel is always available.",
       heat_radius: "Heat radius",
       overlay_map: "Overlay network on map",
       overlay_predicates: "Overlay predicates",
+      geo_records_title: "Linked Records By Place",
+      geo_records_help: "Choose a place on the map to inspect linked entities and source records.",
+      linked_records: "Linked records",
       draw_map: "Draw Map",
       validation_title: "Validation",
       run_validation: "Run Validation",
@@ -149,6 +161,8 @@ const I18N = {
       graph_mode: "מצב גרף",
       copy_link: "העתקת קישור",
       copied: "הועתק",
+      info_title: "מידע",
+      close: "סגירה",
       reports_title: "דוחות + שיטות",
       reports_help: "דוחות מחקר, שיטות, והסבר לגרפים המקוריים (F1-F20) עם קישור ישיר לנתונים ולתשאול.",
       reports_choose: "בחירת מסמך:",
@@ -174,8 +188,13 @@ const I18N = {
       predicates: "סוגי קשר (predicates)",
       source_kinds: "סוגי מקור",
       target_kinds: "סוגי יעד",
-      community_split_count: "מספר קהילות להצגה",
+      community_split_count: "מספר קהילות לחישוב (K)",
       separate_communities: "הפרדה ויזואלית בין קהילות",
+      layout_mode: "פריסה",
+      layout_force: "פריסת כוח (אורגנית)",
+      layout_degree_rings: "טבעות דרגה (20/20/ליבה)",
+      layout_bipartite: "דו-חלקי (ספרים/אנשים)",
+      layout_community_clusters: "אשכולות קהילתיים",
       show_node_labels: "הצג שמות קודקודים",
       show_edge_labels: "הצג שמות קשתות",
       analysis_mode: "מצב ניתוח",
@@ -193,6 +212,8 @@ const I18N = {
       hops: "קפיצות",
       max_edges: "מקסימום קשתות",
       build_global: "בניית רשת כללית",
+      maximize_graph: "מסך מלא לגרף",
+      minimize_graph: "יציאה ממסך מלא",
       download_png: "הורדת PNG",
       network_functions: "פונקציות רשת (איך להשתמש)",
       source_node: "מקור: שם או ID",
@@ -219,15 +240,125 @@ const I18N = {
       person_metrics: "מדדי דמות",
       wikidata_title: "Wikidata: שנים/תקופה",
       geo_title: "גיאוגרפיה",
-      geo_help: "מפת קשרי מקומות עם אפשרות שכבת רשת-על-מפה.",
+      geo_help: "מפת קשרי מקומות עם אפשרות שכבת רשת-על-מפה. חלונית predicates לשכבת-על מוצגת רק כשה-Overlay פעיל; פאנל הרשומות המקושרות תמיד זמין.",
       heat_radius: "רדיוס חום",
       overlay_map: "הצג שכבת רשת על המפה",
       overlay_predicates: "Predicates לשכבת-על",
+      geo_records_title: "רשומות מקושרות לפי מקום",
+      geo_records_help: "בחר מקום במפה כדי לראות ישויות קשורות ורשומות מקור.",
+      linked_records: "רשומות מקושרות",
       draw_map: "שרטוט מפה",
       validation_title: "ולידציה",
       run_validation: "הרצת ולידציה",
       extra_visuals: "ויזואליזציות נוספות ממחקר רשת"
     }
+  }
+};
+
+const INFO_TEXTS = {
+  dataMode: {
+    en: { title: "Graph Mode", body: "Lite loads fast and is recommended for exploration. Full reads the source GEXF file and may be much heavier." },
+    he: { title: "מצב גרף", body: "Lite נטען מהר ומתאים לעבודה שוטפת. Full טוען את קובץ ה-GEXF המלא ויכול להיות כבד משמעותית." }
+  },
+  buildNetwork: {
+    en: { title: "Build Global Network", body: "Builds the graph from current filters: layers, predicates, node kinds, community settings, and layout." },
+    he: { title: "בניית רשת כללית", body: "בונה את הרשת לפי המסננים הפעילים: שכבות, predicates, סוגי קודקודים, הגדרות קהילה ופריסה." }
+  },
+  networkLayoutPreset: {
+    en: { title: "Layout", body: "Force = organic. Degree rings = top 20 degree nodes in outer ring, next 20 in middle ring, all others in center cluster. Bipartite separates books vs people even if same-kind edges still exist." },
+    he: { title: "פריסה", body: "Force היא פריסה אורגנית. Degree rings: 20 קודקודים בדרגה הגבוהה ביותר במעגל חיצוני, 20 הבאים במעגל אמצעי, וכל השאר כאשכול מרכזי. Bipartite מחלק ספרים מול אנשים גם אם קיימות קשתות בתוך אותו סוג." }
+  },
+  networkColorBy: {
+    en: { title: "Analysis Mode", body: "Controls node coloring: by kind, dynamic communities, role, or centrality metrics (degree, in/out, weighted degree, PageRank, clustering)." },
+    he: { title: "מצב ניתוח", body: "קובע איך לצבוע קודקודים: לפי סוג, קהילות דינמיות, תפקיד, או מדדי מרכזיות (דרגה, in/out, דרגה משוקללת, PageRank, clustering)." }
+  },
+  networkCommunityCount: {
+    en: { title: "Community Algorithm", body: "Communities are computed with a Louvain modularity optimization flow (multi-level clustering). K is used as a target count for final grouping after Louvain, so all in-scope data is still partitioned before display filtering." },
+    he: { title: "אלגוריתם קהילות", body: "הקהילות מחושבות באמצעות Louvain (אופטימיזציית modularity רב-שלבית). K משמש כמספר יעד לקיבוץ הסופי אחרי Louvain, כך שכל הדאטה בתחום מתחלק קודם לקהילות לפני סינון תצוגה." }
+  },
+  runEdgeQuery: {
+    en: { title: "Run Query", body: "Queries edges by layer, predicate, source/target kinds, and optional source/target entity. Results feed table, heatmap, and flow Sankey." },
+    he: { title: "הרצת שאילתה", body: "מבצע סינון קשתות לפי שכבה, predicate, סוגי מקור/יעד וישות מקור/יעד אופציונלית. התוצאה מזינה טבלה, heatmap ו-Sankey." }
+  },
+  analyzePerson: {
+    en: { title: "Analyze Person", body: "Builds ego network + tradition tree and enriches with Wikidata period/year candidates." },
+    he: { title: "ניתוח אישי", body: "בונה רשת אגו ועץ מסורות, ומעשיר במועמדי שנים/תקופה מ-Wikidata." }
+  },
+  drawGeo: {
+    en: { title: "Draw Map", body: "Draws place network intensity on map and optional network overlay between related places." },
+    he: { title: "שרטוט מפה", body: "מציג עוצמת קשרי מקום על מפה ואפשרות שכבת-על של קישורים בין מקומות קשורים." }
+  },
+  runValidation: {
+    en: { title: "Validation", body: "Runs integrity checks on reports, source files, graph artifacts, and figure reachability." },
+    he: { title: "ולידציה", body: "מריץ בדיקות תקינות על דוחות, קבצי מקור, ארטיפקטים של גרף וזמינות איורים." }
+  },
+  reportSelect: {
+    en: { title: "Document Selector", body: "Switches between README, research questions, reports, appendix, and graph dictionary/summary." },
+    he: { title: "בחירת מסמך", body: "מעביר בין README, שאלות מחקר, דוחות, נספח, ומילון/סיכום גרף." }
+  },
+  figureSelect: {
+    en: { title: "Figure Explorer", body: "Displays one of the original figures (F1-F20 and entry-centric figure) with research explanation text." },
+    he: { title: "סייר איורים", body: "מציג איור מקורי (F1-F20 וגם גרף entry-centric) יחד עם הסבר מחקרי." }
+  },
+  nodeSearch: {
+    en: { title: "Node Search", body: "Searches entities by label or ID across the raw-node table." },
+    he: { title: "חיפוש קודקוד", body: "מחפש ישויות לפי תווית או ID בטבלת הקודקודים הגולמיים." }
+  },
+  exportNodes: {
+    en: { title: "Export Nodes CSV", body: "Exports the currently filtered node table to CSV." },
+    he: { title: "ייצוא קודקודים", body: "מייצא ל-CSV את טבלת הקודקודים לאחר הסינון הנוכחי." }
+  },
+  runSourceSearch: {
+    en: { title: "Source Search", body: "Searches the source text and opens a contextual snippet around selected hit lines." },
+    he: { title: "חיפוש מקור", body: "מחפש בטקסט המקור ומציג קטע הקשר סביב שורות תוצאה נבחרות." }
+  },
+  networkHops: {
+    en: { title: "Hops", body: "Controls neighborhood depth from focus node when focus is set in global mode." },
+    he: { title: "קפיצות", body: "קובע עומק שכנות מהישות הממוקדת כשמוגדר מיקוד במצב גלובלי." }
+  },
+  networkMaxEdges: {
+    en: { title: "Max Edges", body: "Limits rendered edges to reduce visual and runtime load." },
+    he: { title: "מקסימום קשתות", body: "מגביל את מספר הקשתות המוצגות כדי להפחית עומס חישובי וחזותי." }
+  },
+  personTreePredicate: {
+    en: { title: "Tradition Types", body: "Chooses which relation predicates build the tradition tree." },
+    he: { title: "סוגי מסורת", body: "בוחר אילו predicates של קשרים ישמשו לבניית עץ המסורות." }
+  },
+  personTreeLayout: {
+    en: { title: "Tree Layout", body: "Tree layout favors lineage reading; radial layout emphasizes branching shape." },
+    he: { title: "פריסת עץ", body: "פריסת עץ מתאימה לקריאת שושלת; פריסה רדיאלית מדגישה את צורת ההסתעפות." }
+  },
+  personTreeDepth: {
+    en: { title: "Tree Depth", body: "Maximum generations/levels traversed from selected entity." },
+    he: { title: "עומק עץ", body: "מספר הדורות/הרמות המקסימלי לסריקה מהישות הנבחרת." }
+  },
+  personTreeFanout: {
+    en: { title: "Fanout", body: "Limits children kept per node to control noise in dense areas." },
+    he: { title: "רוחב הסתעפות", body: "מגביל מספר ילדים לכל צומת כדי לשלוט ברעש באזורים צפופים." }
+  },
+  heatRadius: {
+    en: { title: "Heat Radius", body: "Adjusts spread of geographic density heatmap." },
+    he: { title: "רדיוס חום", body: "שולט בהתרחבות מפת החום של צפיפות גיאוגרפית." }
+  },
+  geoNetworkOverlay: {
+    en: { title: "Network Overlay", body: "Draws links between places that are co-related by entities in the semantic graph." },
+    he: { title: "שכבת רשת על מפה", body: "מצייר קישורים בין מקומות המקושרים יחד דרך ישויות בגרף הסמנטי." }
+  },
+  geoOverlayPredicate: {
+    en: { title: "Overlay Predicates", body: "Shown only when map-overlay is enabled. These predicates control which place-to-place overlay connections are drawn." },
+    he: { title: "Predicates לשכבת-על", body: "מוצג רק כשה-Overlay פעיל. ערכים אלו קובעים אילו חיבורי מקום-למקום יוצגו בשכבת העל." }
+  },
+  saveState: {
+    en: { title: "Share Link", body: "Copies current tab/language/entity state into a URL for quick sharing." },
+    he: { title: "קישור שיתוף", body: "מעתיק URL עם מצב נוכחי של לשונית/שפה/ישות לשיתוף מהיר." }
+  },
+  toggleNodeLabels: {
+    en: { title: "Node Labels", body: "Shows or hides node names on all network views to balance readability vs clutter." },
+    he: { title: "תוויות קודקודים", body: "מציג או מסתיר שמות קודקודים בכל התצוגות כדי לאזן בין קריאות לעומס." }
+  },
+  toggleEdgeLabels: {
+    en: { title: "Edge Labels", body: "Shows or hides edge predicate labels. This can be visually dense on large graphs." },
+    he: { title: "תוויות קשתות", body: "מציג או מסתיר תוויות predicates לקשתות. בגרפים גדולים זה עשוי להיות צפוף." }
   }
 };
 
@@ -237,6 +368,7 @@ const APP = {
   docs: {},
   sourceText: "",
   sourceLines: [],
+  sourceLoadingPromise: null,
   nodes: [],
   nodeById: new Map(),
   normLabelToIds: new Map(),
@@ -253,6 +385,9 @@ const APP = {
   activeEdgePredicateTags: new Set(),
   showNodeLabels: true,
   showEdgeLabels: false,
+  graphDefaultsApplied: false,
+  networkCommunityFilterReady: false,
+  syncingCommunityFilter: false,
   cyGlobal: null,
   cyEgo: null,
   cyTree: null,
@@ -406,6 +541,100 @@ function setMultiOptions(id, values, selectedValues = [], labelFormatter = null)
   }).join("");
 }
 
+function setMultiSelection(id, values) {
+  const wanted = new Set(values.map(v => String(v)));
+  const el = document.getElementById(id);
+  if (!el) return;
+  Array.from(el.options).forEach(opt => {
+    opt.selected = wanted.has(String(opt.value));
+  });
+}
+
+function currentSelection(id) {
+  return Array.from(document.getElementById(id)?.selectedOptions || []).map(o => String(o.value));
+}
+
+function chooseDefaultSubset(allValues, preferred) {
+  const allSet = new Set(allValues.map(v => String(v)));
+  const picked = preferred.filter(v => allSet.has(String(v)));
+  return picked.length ? picked : allValues;
+}
+
+function defaultLayerValues(values) {
+  const preferred = ["semantic", "structure"];
+  return chooseDefaultSubset(values, preferred);
+}
+
+function defaultKindValues(values) {
+  const preferred = ["book", "person"];
+  return chooseDefaultSubset(values, preferred);
+}
+
+function showInfoModal(key) {
+  const data = INFO_TEXTS[key]?.[APP.lang] || INFO_TEXTS[key]?.en;
+  if (!data) return;
+  const modal = document.getElementById("infoModal");
+  const title = document.getElementById("infoModalTitle");
+  const body = document.getElementById("infoModalBody");
+  if (!modal || !title || !body) return;
+  title.textContent = data.title;
+  body.textContent = data.body;
+  modal.classList.remove("hidden");
+}
+
+function hideInfoModal() {
+  document.getElementById("infoModal")?.classList.add("hidden");
+}
+
+function addInfoButtonNearControl(controlId, infoKey) {
+  const target = document.getElementById(controlId);
+  if (!target || !target.parentNode) return;
+
+  const existing = target.parentNode.querySelector(`.info-btn[data-info-key="${infoKey}"]`);
+  if (existing) return;
+
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "info-btn";
+  b.textContent = "I";
+  b.setAttribute("aria-label", APP.lang === "he" ? "מידע" : "Information");
+  b.dataset.infoKey = infoKey;
+  b.onclick = () => showInfoModal(infoKey);
+  target.insertAdjacentElement("afterend", b);
+}
+
+function attachInfoButtons() {
+  const map = [
+    ["dataMode", "dataMode"],
+    ["saveState", "saveState"],
+    ["reportSelect", "reportSelect"],
+    ["figureSelect", "figureSelect"],
+    ["nodeSearch", "nodeSearch"],
+    ["exportNodes", "exportNodes"],
+    ["runSourceSearch", "runSourceSearch"],
+    ["buildNetwork", "buildNetwork"],
+    ["networkLayoutPreset", "networkLayoutPreset"],
+    ["networkColorBy", "networkColorBy"],
+    ["networkCommunityCount", "networkCommunityCount"],
+    ["networkHops", "networkHops"],
+    ["networkMaxEdges", "networkMaxEdges"],
+    ["runEdgeQuery", "runEdgeQuery"],
+    ["personTreePredicate", "personTreePredicate"],
+    ["personTreeLayout", "personTreeLayout"],
+    ["personTreeDepth", "personTreeDepth"],
+    ["personTreeFanout", "personTreeFanout"],
+    ["analyzePerson", "analyzePerson"],
+    ["heatRadius", "heatRadius"],
+    ["geoNetworkOverlay", "geoNetworkOverlay"],
+    ["geoOverlayPredicate", "geoOverlayPredicate"],
+    ["drawGeo", "drawGeo"],
+    ["runValidation", "runValidation"],
+    ["toggleNodeLabels", "toggleNodeLabels"],
+    ["toggleEdgeLabels", "toggleEdgeLabels"]
+  ];
+  map.forEach(([controlId, infoKey]) => addInfoButtonNearControl(controlId, infoKey));
+}
+
 function localizeSingleSelectOptions(selectId, formatter) {
   const el = document.getElementById(selectId);
   if (!el) return;
@@ -433,17 +662,43 @@ function isCommunityMode(mode) {
   return mode === "network_communities" || mode === "community";
 }
 
+function isCommunityLayoutPreset() {
+  return (document.getElementById("networkLayoutPreset")?.value || "force") === "community_clusters";
+}
+
 function updateCommunityControlsVisibility() {
   const mode = document.getElementById("networkColorBy")?.value || "kind";
   const box = document.getElementById("networkCommunityControls");
   if (!box) return;
-  box.classList.toggle("hidden", !isCommunityMode(mode));
+  const shouldShow = isCommunityMode(mode) && isCommunityLayoutPreset();
+  box.classList.toggle("hidden", !shouldShow);
+}
+
+function setNetworkFullscreenButtonLabel() {
+  const btn = document.getElementById("toggleNetworkFullscreen");
+  if (!btn) return;
+  const full = !!document.fullscreenElement;
+  btn.textContent = full ? t("minimize_graph") : t("maximize_graph");
 }
 
 async function getText(path) {
   const r = await fetch(path);
   if (!r.ok) throw new Error(`Fetch failed ${path}: ${r.status}`);
   return r.text();
+}
+
+async function ensureSourceTextLoaded() {
+  if (APP.sourceText) return;
+  if (!APP.sourceLoadingPromise) {
+    APP.sourceLoadingPromise = (async () => {
+      const txt = await getText(DATA_PATHS.sourceText);
+      APP.sourceText = txt;
+      APP.sourceLines = txt.split(/\r?\n/);
+    })().finally(() => {
+      APP.sourceLoadingPromise = null;
+    });
+  }
+  await APP.sourceLoadingPromise;
 }
 
 function parseCsv(text) {
@@ -553,9 +808,13 @@ function applyLanguage() {
   if (!document.getElementById("saveState").dataset.stateCopied) {
     document.getElementById("saveState").textContent = t("copy_link");
   }
+  document.querySelectorAll(".info-btn").forEach(btn => {
+    btn.setAttribute("aria-label", APP.lang === "he" ? "מידע" : "Information");
+  });
 
   relabelFilterOptions();
   updateCommunityControlsVisibility();
+  setNetworkFullscreenButtonLabel();
   applyLabelVisibilityToAllGraphs();
 
   buildTabs();
@@ -621,8 +880,9 @@ function renderNetworkFunctionsHelp() {
         "מיקוד אופציונלי: אם מזינים ישות, היא תסומן ותעזור בהתמצאות בלבד.",
         "Layers/Predicates: חיתוך סמנטי מדויק של סוגי הקשרים.",
         "Node Kinds: בקרה האם להציג אנשים, ספרים, מקומות או שילוב.",
+        "Layout: Force (אורגני), Degree Rings (20/20/ליבה), Bipartite (ספרים מול אנשים), Community Clusters.",
         "מצב ניתוח: קהילה היא אפשרות אחת לצד מדדי רשת (Degree, In/Out Degree, Weighted Degree, PageRank, Clustering).",
-        "אם בוחרים 'קהילות ברשת' נפתחות בקרות קהילה ייעודיות (רשימת קהילות, כמות קהילות, הפרדה חזותית).",
+        "במצב 'קהילות ברשת', K מגדיר לכמה קהילות לחלק את כל הדאטה הנוכחי; אחר כך ניתן לבחור אילו קהילות להציג.",
         "Hops + Max edges: איזון בין עומק מחקר לבין עומס ויזואלי.",
         "תגיות predicates מעל טבלת הקשתות הן אינטראקטיביות: לחיצה מפעילה/מכבה חיתוך מיידי."
       ]
@@ -631,8 +891,9 @@ function renderNetworkFunctionsHelp() {
         "Optional focus: if provided, the entity is highlighted for orientation.",
         "Layers/Predicates: semantic slicing over relation families.",
         "Node Kinds: include people, books, places, or any mix.",
+        "Layout: Force (organic), Degree Rings (20/20/core), Bipartite (books vs people), Community Clusters.",
         "Analysis mode: communities are one option among network metrics (degree, in/out degree, weighted degree, PageRank, clustering).",
-        "Choosing 'Communities in Network' opens dedicated community controls.",
+        "In 'Communities in Network', K controls how many communities are computed for all current data before display filtering.",
         "Hops + Max edges: tune depth versus visual load.",
         "Predicate tags above edge results are active filters; click to toggle live slicing."
       ];
@@ -714,14 +975,15 @@ function populateFilters() {
   const kinds = [...new Set(APP.nodes.map(n => n.kind))].sort();
   const four = [...new Set(APP.nodes.map(n => n.four_way))].sort();
   const comm = Array.from(new Set(APP.nodes.map(n => String(n.community)))).sort((a, b) => num(a) - num(b));
+  const defaultKinds = defaultKindValues(kinds);
 
-  setMultiOptions("kindFilter", kinds, [], localizeKind);
+  setMultiOptions("kindFilter", kinds, defaultKinds, localizeKind);
   setMultiOptions("fourWayFilter", four);
   setMultiOptions("communityFilter", comm, [], localizeCommunity);
 
-  setMultiOptions("sourceKindFilter", kinds, [], localizeKind);
-  setMultiOptions("targetKindFilter", kinds, [], localizeKind);
-  setMultiOptions("networkNodeKindFilter", kinds, [], localizeKind);
+  setMultiOptions("sourceKindFilter", kinds, defaultKinds, localizeKind);
+  setMultiOptions("targetKindFilter", kinds, defaultKinds, localizeKind);
+  setMultiOptions("networkNodeKindFilter", kinds, defaultKinds, localizeKind);
 }
 
 function filterRawNodes() {
@@ -821,17 +1083,25 @@ async function loadGraphIfNeeded(mode = "lite") {
 }
 
 function populateGraphFilters() {
-  setMultiOptions("layerFilter", APP.edgeLayers, selValues("layerFilter"), localizeLayer);
+  const defaultLayers = defaultLayerValues(APP.edgeLayers);
+  const savedLayerFilter = APP.graphDefaultsApplied ? selValues("layerFilter") : defaultLayers;
+  const savedNetworkLayerFilter = APP.graphDefaultsApplied ? selValues("networkLayerFilter") : defaultLayers;
+
+  setMultiOptions("layerFilter", APP.edgeLayers, savedLayerFilter, localizeLayer);
   setMultiOptions("predicateFilter", APP.edgePredicates, selValues("predicateFilter"), localizePredicate);
-  setMultiOptions("networkLayerFilter", APP.edgeLayers, selValues("networkLayerFilter"), localizeLayer);
+  setMultiOptions("networkLayerFilter", APP.edgeLayers, savedNetworkLayerFilter, localizeLayer);
   setMultiOptions("networkPredicateFilter", APP.edgePredicates, selValues("networkPredicateFilter"), localizePredicate);
 
   const communities = Array.from(new Set(APP.gNodes.map(n => String(n.community)).filter(v => v !== ""))).sort((a, b) => num(a) - num(b));
-  setMultiOptions("networkCommunityFilter", communities, selValues("networkCommunityFilter"), localizeCommunity);
+  const communitySelection = APP.networkCommunityFilterReady ? selValues("networkCommunityFilter") : communities;
+  setMultiOptions("networkCommunityFilter", communities, communitySelection, localizeCommunity);
+  APP.networkCommunityFilterReady = true;
 
   const placePreds = [...new Set(APP.gEdges.filter(e => e.subtype === "place").map(e => e.predicate).filter(Boolean))].sort();
   setMultiOptions("geoPredicateFilter", placePreds, selValues("geoPredicateFilter"), localizePredicate);
   setMultiOptions("geoOverlayPredicate", placePreds, selValues("geoOverlayPredicate"), localizePredicate);
+
+  APP.graphDefaultsApplied = true;
 }
 
 function clearEdgeTagFilters() {
@@ -1001,7 +1271,7 @@ function subgraphFromSeed(seed, opts) {
     const n = nodeById(id) || { id, label: id, kind: "unknown" };
     return { data: { id, label: labelOf(n), kind: kindOf(n), community: n.community, role: roleOf(n) } };
   });
-  const cyEdges = edges.map(e => ({ data: { id: e.id, source: e.source, target: e.target, predicate: e.predicate, layer: e.layer } }));
+  const cyEdges = edges.map(e => ({ data: { id: e.id, source: e.source, target: e.target, predicate: e.predicate, layer: e.layer, weight: e.weight } }));
   return { cyNodes, cyEdges };
 }
 
@@ -1019,23 +1289,26 @@ function buildGlobalOverviewSubgraph(opts) {
     return true;
   });
 
-  const commCount = new Map();
+  const preNodes = new Set();
   cand.forEach(e => {
-    const s = String(nodeById(e.source)?.community ?? "");
-    const tNode = String(nodeById(e.target)?.community ?? "");
-    if (s) commCount.set(s, (commCount.get(s) || 0) + 1);
-    if (tNode) commCount.set(tNode, (commCount.get(tNode) || 0) + 1);
+    preNodes.add(e.source);
+    preNodes.add(e.target);
   });
 
-  const rankedCommunities = [...commCount.entries()].sort((a, b) => b[1] - a[1]).map(([c]) => c);
-  const selectedPool = communityValues.length ? rankedCommunities.filter(c => communityValues.includes(c)) : rankedCommunities;
-  const finalCommunities = communityCount > 0 ? selectedPool.slice(0, communityCount) : selectedPool;
-  const communitySet = communityCount > 0 ? new Set(finalCommunities) : new Set();
+  const preCyNodes = [...preNodes].map(id => ({ data: { id } }));
+  const preCyEdges = cand.map(e => ({ data: { source: e.source, target: e.target, weight: e.weight } }));
+  const computedCommunities = communityCount > 0 ? computeKCommunities(preCyNodes, preCyEdges, communityCount) : new Map();
+  const availableCommunities = communityCount > 0
+    ? Array.from(new Set(computedCommunities.values())).sort((a, b) => num(a) - num(b))
+    : Array.from(new Set(APP.gNodes.map(n => String(n.community)).filter(v => v !== ""))).sort((a, b) => num(a) - num(b));
+
+  const selectedPool = communityValues.length ? availableCommunities.filter(c => communityValues.includes(c)) : availableCommunities;
+  const communitySet = communityCount > 0 ? new Set(selectedPool) : new Set();
 
   if (communitySet.size) {
     cand = cand.filter(e => {
-      const s = String(nodeById(e.source)?.community ?? "");
-      const tNode = String(nodeById(e.target)?.community ?? "");
+      const s = String(computedCommunities.get(e.source) ?? "");
+      const tNode = String(computedCommunities.get(e.target) ?? "");
       return communitySet.has(s) && communitySet.has(tNode);
     });
   }
@@ -1079,15 +1352,19 @@ function buildGlobalOverviewSubgraph(opts) {
 
   const cyNodes = [...nodes].map(id => {
     const n = nodeById(id) || { id, label: id, kind: "unknown" };
-    return { data: { id, label: labelOf(n), kind: kindOf(n), community: n.community, role: roleOf(n) } };
+    const dynamicCommunity = computedCommunities.get(id);
+    return { data: { id, label: labelOf(n), kind: kindOf(n), community: dynamicCommunity ?? n.community, role: roleOf(n) } };
   });
-  const cyEdges = cand.map(e => ({ data: { id: e.id, source: e.source, target: e.target, predicate: e.predicate, layer: e.layer } }));
+  const cyEdges = cand.map(e => ({ data: { id: e.id, source: e.source, target: e.target, predicate: e.predicate, layer: e.layer, weight: e.weight } }));
+
+  const includedCommunities = communityCount > 0 ? [...communitySet] : [];
 
   return {
     cyNodes,
     cyEdges,
-    includedCommunities: finalCommunities,
-    availableCommunities: rankedCommunities
+    includedCommunities,
+    availableCommunities,
+    computedCommunities
   };
 }
 
@@ -1327,6 +1604,352 @@ function computeCommunityPresetPositions(cyNodes) {
   return positions;
 }
 
+function computeDegreeMap(cyNodes, cyEdges) {
+  const deg = new Map(cyNodes.map(n => [n.data.id, 0]));
+  cyEdges.forEach(e => {
+    const s = e.data.source;
+    const tNode = e.data.target;
+    if (deg.has(s)) deg.set(s, (deg.get(s) || 0) + 1);
+    if (deg.has(tNode)) deg.set(tNode, (deg.get(tNode) || 0) + 1);
+  });
+  return deg;
+}
+
+function computeDegreeRingPositions(cyNodes, cyEdges) {
+  const deg = computeDegreeMap(cyNodes, cyEdges);
+  const ranked = [...cyNodes].sort((a, b) => (deg.get(b.data.id) || 0) - (deg.get(a.data.id) || 0));
+
+  const outer = ranked.slice(0, 20);
+  const mid = ranked.slice(20, 40);
+  const core = ranked.slice(40);
+
+  const positions = {};
+  const placeRing = (arr, radius) => {
+    arr.forEach((n, i) => {
+      const ang = (2 * Math.PI * i) / Math.max(1, arr.length);
+      positions[n.data.id] = {
+        x: Math.cos(ang) * radius,
+        y: Math.sin(ang) * radius
+      };
+    });
+  };
+
+  placeRing(outer, 760);
+  placeRing(mid, 430);
+
+  core.forEach((n, i) => {
+    const ang = i * 0.35;
+    const r = 10 + Math.sqrt(i + 1) * 17;
+    positions[n.data.id] = {
+      x: Math.cos(ang) * r,
+      y: Math.sin(ang) * r
+    };
+  });
+
+  return positions;
+}
+
+function computeBipartitePositions(cyNodes, cyEdges) {
+  const deg = computeDegreeMap(cyNodes, cyEdges);
+  const books = [];
+  const people = [];
+  const others = [];
+
+  cyNodes.forEach(n => {
+    const kind = String(n.data.kind || "");
+    if (kind === "book") books.push(n);
+    else if (kind === "person") people.push(n);
+    else others.push(n);
+  });
+
+  const sortByDegree = (arr) => arr.sort((a, b) => (deg.get(b.data.id) || 0) - (deg.get(a.data.id) || 0));
+  sortByDegree(books);
+  sortByDegree(people);
+  sortByDegree(others);
+
+  const positions = {};
+  const colHeight = Math.max(books.length, people.length, 1);
+  const step = Math.max(18, Math.min(36, 1800 / colHeight));
+  const startY = -((colHeight - 1) * step) / 2;
+
+  books.forEach((n, i) => {
+    positions[n.data.id] = { x: -520, y: startY + (i * step) };
+  });
+
+  people.forEach((n, i) => {
+    positions[n.data.id] = { x: 520, y: startY + (i * step) };
+  });
+
+  others.forEach((n, i) => {
+    const ang = (2 * Math.PI * i) / Math.max(1, others.length);
+    const radius = 130 + Math.sqrt(i + 1) * 10;
+    positions[n.data.id] = {
+      x: Math.cos(ang) * radius,
+      y: Math.sin(ang) * radius
+    };
+  });
+
+  return positions;
+}
+
+function computeKCommunities(cyNodes, cyEdges, requestedK) {
+  const nodeIds = [...new Set(cyNodes.map(n => n.data.id))];
+  if (!nodeIds.length) return new Map();
+
+  const targetK = Math.max(2, Math.min(num(requestedK) || 2, nodeIds.length));
+
+  const edgeMap = new Map();
+  const addW = (a, b, w) => {
+    const x = String(a), y = String(b);
+    const key = x < y ? `${x}||${y}` : `${y}||${x}`;
+    edgeMap.set(key, (edgeMap.get(key) || 0) + w);
+  };
+
+  cyEdges.forEach(e => {
+    const s = e.data.source;
+    const tNode = e.data.target;
+    if (s == null || tNode == null) return;
+    const w = Math.max(0.0001, num(e.data.weight) || 1);
+    addW(s, tNode, w);
+  });
+
+  const baseEdges = [...edgeMap.entries()].map(([k, w]) => {
+    const [a, b] = k.split("||");
+    return { source: a, target: b, weight: w };
+  });
+
+  let levelNodes = [...nodeIds];
+  let levelEdges = baseEdges;
+
+  let labels = new Map(nodeIds.map(id => [id, id]));
+  let stableRounds = 0;
+
+  for (let level = 0; level < 8; level++) {
+    const pass = louvainOneLevel(levelNodes, levelEdges);
+    const changed = pass.changed;
+
+    labels = composePartitionLabels(labels, pass.partition);
+    const aggregated = aggregateGraph(levelNodes, levelEdges, pass.partition);
+
+    if (!changed) stableRounds++;
+    else stableRounds = 0;
+
+    if (!aggregated.edges.length || aggregated.nodes.length === levelNodes.length || stableRounds >= 2) {
+      break;
+    }
+
+    levelNodes = aggregated.nodes;
+    levelEdges = aggregated.edges;
+  }
+
+  let finalLabels = relabelCompact(labels);
+  finalLabels = enforceTargetCommunityCount(finalLabels, nodeIds, baseEdges, targetK);
+  return relabelCompact(finalLabels);
+}
+
+function buildUndirectedAdjacency(nodeIds, edges) {
+  const adj = new Map(nodeIds.map(id => [id, new Map()]));
+  const deg = new Map(nodeIds.map(id => [id, 0]));
+  let totalWeight = 0;
+
+  edges.forEach(e => {
+    const s = e.source;
+    const tNode = e.target;
+    const w = Math.max(0.0001, num(e.weight) || 1);
+    if (!adj.has(s) || !adj.has(tNode)) return;
+    adj.get(s).set(tNode, (adj.get(s).get(tNode) || 0) + w);
+    if (s !== tNode) adj.get(tNode).set(s, (adj.get(tNode).get(s) || 0) + w);
+    deg.set(s, (deg.get(s) || 0) + w);
+    if (s !== tNode) deg.set(tNode, (deg.get(tNode) || 0) + w);
+    totalWeight += w;
+  });
+
+  return { adj, deg, m2: Math.max(0.0001, totalWeight * 2) };
+}
+
+function louvainOneLevel(nodeIds, edges) {
+  const { adj, deg, m2 } = buildUndirectedAdjacency(nodeIds, edges);
+  const commOf = new Map(nodeIds.map(id => [id, id]));
+  const commTot = new Map(nodeIds.map(id => [id, deg.get(id) || 0]));
+
+  const nodeOrder = [...nodeIds].sort((a, b) => (deg.get(b) || 0) - (deg.get(a) || 0));
+  let changed = false;
+
+  for (let iter = 0; iter < 25; iter++) {
+    let moved = 0;
+    for (const node of nodeOrder) {
+      const kI = deg.get(node) || 0;
+      if (kI <= 0) continue;
+
+      const neigh = adj.get(node) || new Map();
+      const current = commOf.get(node);
+
+      const neighCommWeight = new Map();
+      neigh.forEach((w, nb) => {
+        const c = commOf.get(nb);
+        neighCommWeight.set(c, (neighCommWeight.get(c) || 0) + w);
+      });
+
+      commTot.set(current, (commTot.get(current) || 0) - kI);
+
+      let bestComm = current;
+      let bestGain = 0;
+
+      const candidates = new Set([current, ...neighCommWeight.keys()]);
+      candidates.forEach(c => {
+        const kiIn = neighCommWeight.get(c) || 0;
+        const gain = kiIn - ((commTot.get(c) || 0) * kI) / m2;
+        if (gain > bestGain + 1e-10) {
+          bestGain = gain;
+          bestComm = c;
+        }
+      });
+
+      commOf.set(node, bestComm);
+      commTot.set(bestComm, (commTot.get(bestComm) || 0) + kI);
+
+      if (bestComm !== current) {
+        moved++;
+        changed = true;
+      }
+    }
+    if (!moved) break;
+  }
+
+  return { partition: commOf, changed };
+}
+
+function composePartitionLabels(prevLabels, levelPartition) {
+  const out = new Map();
+  prevLabels.forEach((prevCluster, originalNodeId) => {
+    const next = levelPartition.get(prevCluster) ?? prevCluster;
+    out.set(originalNodeId, next);
+  });
+  return out;
+}
+
+function aggregateGraph(levelNodes, levelEdges, partition) {
+  const superNodeSet = new Set();
+  const edgeMap = new Map();
+
+  const superOf = (id) => partition.get(id) ?? id;
+  levelNodes.forEach(id => superNodeSet.add(superOf(id)));
+
+  const add = (a, b, w) => {
+    const x = String(a), y = String(b);
+    const key = x < y ? `${x}||${y}` : `${y}||${x}`;
+    edgeMap.set(key, (edgeMap.get(key) || 0) + w);
+  };
+
+  levelEdges.forEach(e => {
+    const s = superOf(e.source);
+    const tNode = superOf(e.target);
+    const w = Math.max(0.0001, num(e.weight) || 1);
+    add(s, tNode, w);
+  });
+
+  const nodes = [...superNodeSet];
+  const edges = [...edgeMap.entries()].map(([k, w]) => {
+    const [a, b] = k.split("||");
+    return { source: a, target: b, weight: w };
+  });
+  return { nodes, edges };
+}
+
+function relabelCompact(labels) {
+  const map = new Map();
+  let ix = 1;
+  const out = new Map();
+  labels.forEach((c, id) => {
+    const key = String(c);
+    if (!map.has(key)) {
+      map.set(key, String(ix));
+      ix++;
+    }
+    out.set(id, map.get(key));
+  });
+  return out;
+}
+
+function communitySizes(labels) {
+  const sizes = new Map();
+  labels.forEach(c => sizes.set(c, (sizes.get(c) || 0) + 1));
+  return sizes;
+}
+
+function enforceTargetCommunityCount(labels, nodeIds, edges, targetK) {
+  let out = new Map(labels);
+
+  const buildCommGraph = (lab) => {
+    const weights = new Map();
+    const add = (a, b, w) => {
+      const x = String(a), y = String(b);
+      const key = x < y ? `${x}||${y}` : `${y}||${x}`;
+      weights.set(key, (weights.get(key) || 0) + w);
+    };
+    edges.forEach(e => {
+      const a = lab.get(e.source);
+      const b = lab.get(e.target);
+      if (!a || !b) return;
+      add(a, b, Math.max(0.0001, num(e.weight) || 1));
+    });
+    return weights;
+  };
+
+  while (new Set(out.values()).size > targetK) {
+    const sizes = communitySizes(out);
+    const comms = [...sizes.keys()].sort((a, b) => (sizes.get(a) || 0) - (sizes.get(b) || 0));
+    const from = comms[0];
+    const commGraph = buildCommGraph(out);
+
+    let bestTo = "";
+    let bestW = -1;
+    commGraph.forEach((w, key) => {
+      const [a, b] = key.split("||");
+      if (a === from && b !== from && w > bestW) { bestW = w; bestTo = b; }
+      if (b === from && a !== from && w > bestW) { bestW = w; bestTo = a; }
+    });
+
+    if (!bestTo) {
+      const fallback = comms.find(c => c !== from);
+      if (!fallback) break;
+      bestTo = fallback;
+    }
+
+    out.forEach((c, id) => {
+      if (c === from) out.set(id, bestTo);
+    });
+  }
+
+  while (new Set(out.values()).size < targetK) {
+    const sizes = communitySizes(out);
+    const largest = [...sizes.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+    if (!largest || (sizes.get(largest) || 0) < 2) break;
+
+    const nodesInLargest = nodeIds.filter(id => out.get(id) === largest);
+    const deg = new Map(nodesInLargest.map(id => [id, 0]));
+    edges.forEach(e => {
+      if (out.get(e.source) !== largest || out.get(e.target) !== largest) return;
+      const w = Math.max(0.0001, num(e.weight) || 1);
+      deg.set(e.source, (deg.get(e.source) || 0) + w);
+      if (e.source !== e.target) deg.set(e.target, (deg.get(e.target) || 0) + w);
+    });
+
+    const sorted = [...nodesInLargest].sort((a, b) => (deg.get(b) || 0) - (deg.get(a) || 0));
+    const splitTake = Math.max(1, Math.floor(sorted.length / 2));
+    let splitIx = 1;
+    let newLabel = `${largest}_split_${splitIx}`;
+    const usedLabels = new Set(out.values());
+    while (usedLabels.has(newLabel)) {
+      splitIx++;
+      newLabel = `${largest}_split_${splitIx}`;
+    }
+    sorted.slice(0, splitTake).forEach(id => out.set(id, newLabel));
+  }
+
+  return out;
+}
+
 function applyLabelVisibilityToCy(cy) {
   if (!cy) return;
   cy.style()
@@ -1385,6 +2008,7 @@ function buildCy(containerId, cyNodes, cyEdges, colorBy = "kind", treeLike = fal
   };
 
   let layout;
+  const preset = String(extra.layoutPreset || "force");
   if (treeLike && layoutMode === "radial") {
     layout = {
       name: "concentric",
@@ -1394,7 +2018,23 @@ function buildCy(containerId, cyNodes, cyEdges, colorBy = "kind", treeLike = fal
     };
   } else if (treeLike) {
     layout = { name: "breadthfirst", directed: true, padding: 24, animate: false };
-  } else if (extra.separateByCommunity) {
+  } else if (preset === "degree_rings") {
+    const pos = computeDegreeRingPositions(cyNodes, cyEdges);
+    layout = {
+      name: "preset",
+      fit: true,
+      padding: 28,
+      positions: (node) => pos[node.id()] || { x: 0, y: 0 }
+    };
+  } else if (preset === "bipartite") {
+    const pos = computeBipartitePositions(cyNodes, cyEdges);
+    layout = {
+      name: "preset",
+      fit: true,
+      padding: 28,
+      positions: (node) => pos[node.id()] || { x: 0, y: 0 }
+    };
+  } else if (preset === "community_clusters" || extra.separateByCommunity) {
     const pos = computeCommunityPresetPositions(cyNodes);
     layout = {
       name: "preset",
@@ -1439,8 +2079,10 @@ function getDefaultSeed() {
 function buildGlobalNetwork() {
   const focusId = resolveInputToId(document.getElementById("seedNode").value);
   const analysisMode = document.getElementById("networkColorBy").value;
+  const layoutPreset = document.getElementById("networkLayoutPreset")?.value || "force";
   const useCommunityMode = isCommunityMode(analysisMode);
-  const communityCount = useCommunityMode ? Math.max(1, Math.min(30, num(document.getElementById("networkCommunityCount").value))) : 0;
+  const useCommunityLayout = useCommunityMode && layoutPreset === "community_clusters";
+  const communityCount = useCommunityMode ? Math.max(2, Math.min(30, num(document.getElementById("networkCommunityCount").value))) : 0;
 
   const graph = buildGlobalOverviewSubgraph({
     layers: selValues("networkLayerFilter"),
@@ -1452,6 +2094,12 @@ function buildGlobalNetwork() {
     hops: Math.max(1, Math.min(3, num(document.getElementById("networkHops").value))),
     maxEdges: Math.max(50, Math.min(6000, num(document.getElementById("networkMaxEdges").value)))
   });
+
+  if (useCommunityMode) {
+    const prevSelection = currentSelection("networkCommunityFilter");
+    const nextSelection = prevSelection.length ? graph.availableCommunities.filter(c => prevSelection.includes(c)) : graph.availableCommunities;
+    setMultiOptions("networkCommunityFilter", graph.availableCommunities, nextSelection, localizeCommunity);
+  }
 
   if (!graph.cyNodes.length) {
     document.getElementById("networkInfo").innerHTML = `<p class="status-err">${APP.lang === "he" ? "לא נמצאו תוצאות עבור הסינון הנוכחי." : "No graph results for current filters."}</p>`;
@@ -1477,10 +2125,13 @@ function buildGlobalNetwork() {
     false,
     "global",
     "broad",
-    { separateByCommunity: useCommunityMode && document.getElementById("networkSeparateCommunities").checked }
+    {
+      separateByCommunity: useCommunityLayout && document.getElementById("networkSeparateCommunities").checked,
+      layoutPreset
+    }
   );
 
-  const commText = graph.includedCommunities.map(c => localizeCommunity(c)).join(" | ");
+  const commText = graph.availableCommunities.map(c => localizeCommunity(c)).join(" | ");
   const focusText = focusId && APP.gNodeById.has(focusId)
     ? (APP.lang === "he" ? ` | מיקוד: ${esc(labelOf(nodeById(focusId)))}` : ` | Focus: ${esc(labelOf(nodeById(focusId)))}`)
     : "";
@@ -1488,7 +2139,7 @@ function buildGlobalNetwork() {
     ? `<p><strong>${esc(t("metric_top_nodes"))} (${esc(metricLabel(metricState.mode))}):</strong> ${metricState.topRows.map(x => `${esc(x.label)} (${num(x.value).toFixed(4)})`).join(" | ")}</p>`
     : "";
   const communityInfo = useCommunityMode
-    ? `<p>${APP.lang === "he" ? "קהילות מוצגות" : "Communities shown"}: ${commText || "-"}</p>`
+    ? `<p>${APP.lang === "he" ? "קהילות מחושבות" : "Computed communities"}: ${commText || "-"}</p>`
     : "";
   document.getElementById("networkInfo").innerHTML = APP.lang === "he"
     ? `<p>מבט-על לרשת הכללית${focusText} | צמתים: ${graph.cyNodes.length} | קשתות: ${graph.cyEdges.length}</p>${communityInfo}${metricInfo}`
@@ -1567,7 +2218,7 @@ function buildTraditionTree(seed, predicates, direction, depth, fanout) {
     const n = nodeById(id) || { id, label: id, kind: "unknown" };
     return { data: { id, label: labelOf(n), kind: kindOf(n), community: n.community, role: roleOf(n), depth: depthMap.get(id) ?? 0 } };
   });
-  const cyEdges = outEdges.slice(0, 3200).map(e => ({ data: { id: `t-${e.id}-${e.source}-${e.target}`, source: e.source, target: e.target, predicate: e.predicate, layer: e.layer } }));
+  const cyEdges = outEdges.slice(0, 3200).map(e => ({ data: { id: `t-${e.id}-${e.source}-${e.target}`, source: e.source, target: e.target, predicate: e.predicate, layer: e.layer, weight: e.weight } }));
 
   return { cyNodes, cyEdges, levelCounts, predicateCounts };
 }
@@ -1703,8 +2354,75 @@ function initMap() {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap" }).addTo(APP.map);
 }
 
+function setGeoRecordsPanelVisible(visible) {
+  const card = document.getElementById("geoRecordsCard");
+  if (!card) return;
+  card.classList.toggle("hidden", !visible);
+}
+
+function setGeoOverlayPredicateVisible(visible) {
+  const wrap = document.getElementById("geoOverlayPredicateWrap");
+  if (!wrap) return;
+  wrap.classList.toggle("hidden", !visible);
+}
+
+function renderGeoLinkedRecords(placeNode, placeEdges) {
+  const wrap = document.getElementById("geoRecordsWrap");
+  if (!wrap) return;
+  if (!placeNode) {
+    wrap.innerHTML = "";
+    return;
+  }
+
+  const edges = placeEdges.filter(e => e.target === placeNode.id);
+  const bySource = new Map();
+
+  edges.forEach(e => {
+    const src = nodeById(e.source);
+    const key = e.source;
+    if (!bySource.has(key)) {
+      bySource.set(key, {
+        sourceId: e.source,
+        label: labelOf(src || { id: e.source }),
+        kind: kindOf(src || { kind: "unknown" }),
+        count: 0,
+        predicates: new Map()
+      });
+    }
+    const row = bySource.get(key);
+    row.count += 1;
+    row.predicates.set(e.predicate, (row.predicates.get(e.predicate) || 0) + 1);
+  });
+
+  const rows = [...bySource.values()]
+    .map(r => ({
+      ...r,
+      predText: [...r.predicates.entries()].sort((a, b) => b[1] - a[1]).map(([p, c]) => `${localizePredicate(p)}:${c}`).join(" | ")
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const title = APP.lang === "he" ? `רשומות מקושרות למקום: ${labelOf(placeNode)} (${placeNode.id})` : `Linked records for place: ${labelOf(placeNode)} (${placeNode.id})`;
+  const noRows = APP.lang === "he" ? "לא נמצאו רשומות מקושרות." : "No linked records found.";
+
+  wrap.innerHTML = rows.length
+    ? `<p><strong>${esc(title)}</strong> | ${rows.length}</p><table class="table"><thead><tr><th>${APP.lang === "he" ? "ישות" : "Entity"}</th><th>${APP.lang === "he" ? "סוג" : "Kind"}</th><th>${APP.lang === "he" ? "כמות קישורים" : "Links"}</th><th>Predicates</th><th>${APP.lang === "he" ? "פעולות" : "Actions"}</th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r.label)}<br/><small>${esc(r.sourceId)}</small></td><td>${esc(localizeKind(r.kind))}</td><td>${esc(r.count)}</td><td>${esc(r.predText)}</td><td><button class="btn ghost geo-open-source" data-id="${esc(r.sourceId)}">${APP.lang === "he" ? "מקור" : "Source"}</button></td></tr>`).join("")}</tbody></table>`
+    : `<p class="status-warn">${esc(noRows)}</p>`;
+
+  document.querySelectorAll(".geo-open-source").forEach(btn => {
+    btn.onclick = () => jumpToSourceByNodeId(btn.getAttribute("data-id"));
+  });
+}
+
+function openGeoPlaceDetails(placeId, placeEdges, forceOpenPanel = true) {
+  const place = nodeById(placeId);
+  if (!place) return;
+  if (forceOpenPanel) setGeoRecordsPanelVisible(true);
+  renderGeoLinkedRecords(place, placeEdges);
+}
+
 function drawGeo() {
   initMap();
+  APP.map.invalidateSize(true);
   const selectedPreds = new Set(selValues("geoPredicateFilter"));
   const radius = num(document.getElementById("heatRadius").value || 18);
   const overlay = document.getElementById("geoNetworkOverlay").checked;
@@ -1725,12 +2443,18 @@ function drawGeo() {
     const lon = num(p.lon);
     const score = num(p.place_in) || 1;
     heat.push([lat, lon, Math.min(1, score / 20)]);
-    L.circleMarker([lat, lon], { radius: Math.max(4, Math.min(14, Math.sqrt(score) + 2)), color: "#005f73", fillColor: "#ee9b00", fillOpacity: 0.7, weight: 1 })
+    const marker = L.circleMarker([lat, lon], { radius: Math.max(4, Math.min(14, Math.sqrt(score) + 2)), color: "#005f73", fillColor: "#ee9b00", fillOpacity: 0.7, weight: 1 })
       .bindPopup(`<strong>${esc(labelOf(p))}</strong><br/>${esc(p.id)}<br/>place_in=${score}`)
       .addTo(APP.mapMarkers);
+    marker.on("click", () => openGeoPlaceDetails(p.id, pEdges, true));
   });
 
-  APP.mapHeat = L.heatLayer(heat, { radius, blur: 18, maxZoom: 5 }).addTo(APP.map);
+  if (heat.length) {
+    const geoMapEl = document.getElementById("geoMap");
+    if ((geoMapEl?.clientWidth || 0) > 0 && (geoMapEl?.clientHeight || 0) > 0) {
+      APP.mapHeat = L.heatLayer(heat, { radius, blur: 18, maxZoom: 5 }).addTo(APP.map);
+    }
+  }
   if (places.length) APP.map.fitBounds(L.latLngBounds(places.map(p => [num(p.lat), num(p.lon)])).pad(0.2));
 
   if (overlay) {
@@ -1750,7 +2474,19 @@ function drawGeo() {
   }).sort((a, b) => num(b.place_in) - num(a.place_in));
 
   const cols = ["id", "label", "lat", "lon", "place_in", "predicates"];
-  document.getElementById("placeTableWrap").innerHTML = `<table class="table"><thead><tr>${cols.map(c => `<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${cols.map(c => `<td>${esc(r[c])}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  document.getElementById("placeTableWrap").innerHTML = `<table class="table"><thead><tr>${cols.map(c => `<th>${c}</th>`).join("")}<th>${APP.lang === "he" ? "רשומות" : "Records"}</th></tr></thead><tbody>${rows.map(r => `<tr data-place-id="${esc(r.id)}">${cols.map(c => `<td>${esc(r[c])}</td>`).join("")}<td><button class="btn ghost geo-open-place" data-place-id="${esc(r.id)}">${APP.lang === "he" ? "פתח" : "Open"}</button></td></tr>`).join("")}</tbody></table>`;
+
+  document.querySelectorAll(".geo-open-place").forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      openGeoPlaceDetails(btn.getAttribute("data-place-id"), pEdges, true);
+    };
+  });
+
+  document.querySelectorAll("#placeTableWrap tbody tr").forEach(tr => {
+    tr.onclick = () => openGeoPlaceDetails(tr.getAttribute("data-place-id"), pEdges, true);
+  });
+
 }
 
 function drawNetworkOverlayOnMap(layerGroup, placeEdges, overlayPreds) {
@@ -1822,9 +2558,7 @@ async function runSourceSearch() {
     const box = document.getElementById("sourceHits");
     box.innerHTML = `<p>${APP.lang === "he" ? "טוען טקסט מקור..." : "Loading source text..."}</p>`;
     try {
-      const txt = await getText(DATA_PATHS.sourceText);
-      APP.sourceText = txt;
-      APP.sourceLines = txt.split(/\r?\n/);
+      await ensureSourceTextLoaded();
     } catch (e) {
       box.innerHTML = `<p class="status-err">${esc(e.message)}</p>`;
       return;
@@ -1949,6 +2683,31 @@ function wireEvents() {
   document.getElementById("toggleNodeLabels").checked = APP.showNodeLabels;
   document.getElementById("toggleEdgeLabels").checked = APP.showEdgeLabels;
   updateCommunityControlsVisibility();
+  setGeoRecordsPanelVisible(true);
+  setGeoOverlayPredicateVisible(!!document.getElementById("geoNetworkOverlay")?.checked);
+  setNetworkFullscreenButtonLabel();
+  attachInfoButtons();
+
+  const infoModal = document.getElementById("infoModal");
+  document.getElementById("closeInfoModal").onclick = hideInfoModal;
+  infoModal?.addEventListener("click", (evt) => {
+    if (evt.target === infoModal) hideInfoModal();
+  });
+
+  document.getElementById("toggleNetworkFullscreen").onclick = async () => {
+    const stage = document.getElementById("networkStage");
+    if (!stage) return;
+    if (!document.fullscreenElement) await stage.requestFullscreen();
+    else await document.exitFullscreen();
+  };
+
+  document.addEventListener("fullscreenchange", () => {
+    setNetworkFullscreenButtonLabel();
+    if (APP.cyGlobal) {
+      APP.cyGlobal.resize();
+      APP.cyGlobal.fit(undefined, 20);
+    }
+  });
 
   document.getElementById("langToggle").onclick = () => {
     APP.lang = APP.lang === "he" ? "en" : "he";
@@ -2020,6 +2779,11 @@ function wireEvents() {
     });
   });
 
+  document.getElementById("networkLayoutPreset")?.addEventListener("change", () => {
+    updateCommunityControlsVisibility();
+    if (APP.gLoaded && APP.cyGlobal) buildGlobalNetwork();
+  });
+
   document.getElementById("downloadGlobalPng").onclick = () => {
     downloadCyPng(APP.cyGlobal, "global_network.png");
   };
@@ -2050,6 +2814,10 @@ function wireEvents() {
       drawGeo();
     } finally { hideLoadingOverlay(); }
   };
+
+  document.getElementById("geoNetworkOverlay")?.addEventListener("change", (e) => {
+    setGeoOverlayPredicateVisible(!!e.target.checked);
+  });
 
   document.getElementById("runValidation").onclick = runValidation;
   document.getElementById("saveState").onclick = saveShareLink;
@@ -2105,6 +2873,12 @@ async function init() {
   wireEvents();
   activateTab(APP.activeTab);
   setStatus();
+
+  // Warm source text in the background to reduce first-search latency.
+  setTimeout(() => {
+    ensureSourceTextLoaded().catch(() => {});
+  }, 1200);
+
   await loadInitialGlobalNetwork();
 }
 

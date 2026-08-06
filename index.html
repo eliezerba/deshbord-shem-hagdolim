@@ -100,6 +100,12 @@
           <label class="stack-label"><span data-i18n="layers">Layers</span><select id="networkLayerFilter" multiple size="3"></select></label>
           <label class="stack-label"><span data-i18n="predicates">Predicates</span><select id="networkPredicateFilter" multiple size="6"></select></label>
           <label class="stack-label"><span data-i18n="node_kinds">Node kinds</span><select id="networkNodeKindFilter" multiple size="3"></select></label>
+          <label class="stack-label"><span data-i18n="layout_mode">Layout</span><select id="networkLayoutPreset">
+            <option value="force" selected data-i18n="layout_force">Force (organic)</option>
+            <option value="degree_rings" data-i18n="layout_degree_rings">Degree rings (20/20/core)</option>
+            <option value="bipartite" data-i18n="layout_bipartite">Bipartite (books/people)</option>
+            <option value="community_clusters" data-i18n="layout_community_clusters">Community clusters</option>
+          </select></label>
           <label class="stack-label"><span data-i18n="analysis_mode">Analysis mode</span><select id="networkColorBy">
             <option value="kind" selected data-i18n="color_kind">Color by Kind</option>
             <option value="network_communities" data-i18n="color_network_communities">Communities in Network</option>
@@ -113,15 +119,18 @@
           </select></label>
           <div id="networkCommunityControls" class="community-controls hidden">
             <label class="stack-label"><span data-i18n="communities">Communities</span><select id="networkCommunityFilter" multiple size="6"></select></label>
-            <label><span data-i18n="community_split_count">Communities to include</span> <input id="networkCommunityCount" type="number" min="1" max="30" value="6" /></label>
+            <label><span data-i18n="community_split_count">Communities to compute (K)</span> <input id="networkCommunityCount" type="number" min="2" max="30" value="8" /></label>
             <label><input type="checkbox" id="networkSeparateCommunities" checked /> <span data-i18n="separate_communities">Visually separate communities</span></label>
           </div>
           <label><span data-i18n="hops">Hops</span> <input id="networkHops" type="number" min="1" max="3" value="1" /></label>
           <label><span data-i18n="max_edges">Max edges</span> <input id="networkMaxEdges" type="number" min="50" max="6000" value="1200" /></label>
           <button id="buildNetwork" class="btn" data-i18n="build_global">Build Global Network</button>
+          <button id="toggleNetworkFullscreen" class="btn ghost" data-i18n="maximize_graph">Maximize Graph</button>
           <button id="downloadGlobalPng" class="btn ghost" data-i18n="download_png">Download PNG</button>
         </div>
-        <div id="network"></div>
+        <div id="networkStage" class="network-stage">
+          <div id="network"></div>
+        </div>
         <div id="networkInfo"></div>
         <div id="networkMetrics" class="metrics-grid"></div>
       </article>
@@ -210,18 +219,23 @@
     <section class="panel" id="tab-geo">
       <article class="card help-card">
         <h2 data-i18n="geo_title">גיאוגרפיה</h2>
-        <p data-i18n="geo_help">מפת קשרי מקום + פונקציית Network-on-Map שמציירת קישורים בין מקומות לפי רשת סמנטית.</p>
+        <p data-i18n="geo_help">מפת קשרי מקום + פונקציית Network-on-Map שמציירת קישורים בין מקומות לפי רשת סמנטית. הפאנל הימני הוא פאנל אופציונלי לרשומות מקושרות לכל מקום.</p>
       </article>
       <div class="toolbar wrap">
         <label class="stack-label"><span data-i18n="predicates">Predicates</span><select id="geoPredicateFilter" multiple size="6"></select></label>
         <label><span data-i18n="heat_radius">Heat radius</span> <input id="heatRadius" type="number" min="5" max="40" value="18" /></label>
         <label><input type="checkbox" id="geoNetworkOverlay" /> <span data-i18n="overlay_map">Overlay network on map</span></label>
-        <label class="stack-label"><span data-i18n="overlay_predicates">Overlay predicates</span><select id="geoOverlayPredicate" multiple size="6"></select></label>
+        <label class="stack-label hidden" id="geoOverlayPredicateWrap"><span data-i18n="overlay_predicates">Overlay predicates</span><select id="geoOverlayPredicate" multiple size="6"></select></label>
         <button id="drawGeo" class="btn" data-i18n="draw_map">Draw Map</button>
       </div>
       <div class="grid-two">
         <article class="card"><div id="geoMap"></div></article>
-        <article class="card"><div id="placeTableWrap" class="table-wrap"></div></article>
+        <article class="card" id="geoRecordsCard">
+          <h3 data-i18n="geo_records_title">Linked Records By Place</h3>
+          <p class="mini-help" data-i18n="geo_records_help">Choose a place on the map to inspect linked entities and source records.</p>
+          <div id="placeTableWrap" class="table-wrap"></div>
+          <div id="geoRecordsWrap" class="table-wrap" style="margin-top:.65rem;"></div>
+        </article>
       </div>
     </section>
 
@@ -241,6 +255,16 @@
   <footer>
     <small id="footerNote"></small>
   </footer>
+
+  <div id="infoModal" class="info-modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
+    <div class="info-modal-card">
+      <div class="info-modal-head">
+        <h3 id="infoModalTitle" data-i18n="info_title">Info</h3>
+        <button id="closeInfoModal" class="btn ghost" type="button" data-i18n="close">Close</button>
+      </div>
+      <div id="infoModalBody" class="info-modal-body"></div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
