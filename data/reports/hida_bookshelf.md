@@ -258,7 +258,7 @@ contemporaneity is not, and it is the heart of the finding.
 Mapped, does a geography emerge — and is the geography of *making books* the same as the geography of *living Torah*?
 
 **Books were made in the West; Torah was lived in the East.** Resolving the Hida's place-references against a
-gazetteer yields **180 places** carrying coordinates, joined to scholars and books by **824 typed relations** (F18,
+gazetteer yields **176 places** carrying coordinates, joined to scholars and books by **822 typed relations** (F18,
 the map). Two distinct geographies appear. **Printing** concentrates in the Christian-European trade and port cities:
 **Venice (51), Amsterdam (42)**, then Constantinople, Frankfurt, Prague, Żółkiew, Salonika, Dyhernfurth — the top
 five centers account for **half of all located printing**. But the **rabbinic** geography — where scholars *served,
@@ -296,7 +296,7 @@ replace reading the Hida; it tells us *where* to read him closely.
 
 **Limitations, in brief** (full version in the [appendix](hida_bookshelf_appendix.md)):
 - **No dates.** All chronology here is indirect (via *contemporary-of*). **Places are now included** (Chapter 6:
-  180 gazetteer-resolved locations with coordinates, Layer-C-only), but they are partial — recorded only where the
+  176 gazetteer-resolved locations with coordinates, Layer-C-only), but they are partial — recorded only where the
   text states a location, and ~8% of place-references remain unresolved.
 - **Layer B is inflated.** Co-mention manufactures dense pseudo-relationships; we used it only as backdrop.
 - **Layer C is partial and model-extracted.** It records a relation only where the text is explicit, and a language

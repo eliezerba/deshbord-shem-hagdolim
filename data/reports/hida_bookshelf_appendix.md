@@ -19,7 +19,7 @@ assembly.
 **Assembled multiplex:** originally 4,948 nodes · 129,848 edges (**A** structural 15,285 · **B** association 103,608 ·
 **C** semantic 11,033 aggregated / **12,191 raw** pre-symmetric-expansion). Node typology: I person-entry 1,484 ·
 II person-external 632 · III book-entry 2,033 · IV book-external 799. **64** Louvain communities (baked into
-`node_metrics.csv`). **With places (Stage XI): 5,128 nodes (+180 `V_place`) · 130,615 edges (+767 Layer-C place
+`node_metrics.csv`). **With places (Stage XI): 5,124 nodes (+176 `V_place`) · 130,613 edges (+765 Layer-C place
 edges, `subtype=place`).** Places are kept OUT of the person/book centralities and the Louvain partition (community
 IDs verified unchanged), so all Chapters 1–5 numbers are unaffected; place nodes carry lat/long and a `place_in`
 degree. Chapters 1–5 report the raw C convention; Chapter 6 uses the place layer.
@@ -128,10 +128,14 @@ dispute-triangle z=+4.9, student-cites-teacher z=+8.4.
 
 1. **No temporal data; geography now included but partial.** Chronology is inferred only through `contemporaryOf`
    (no birth/death years), so claims about "generations"/"across time" rest on graph depth, not dates. **Places were
-   added in Stage XI** (Chapter 6): 180 gazetteer-resolved locations (lab `labgen` gazetteer; `code/hagdolim/places/`)
-   attached as **Layer-C-only** edges (768), 92% of place-references resolved (deterministic Hebrew-alias matching
-   with an `attached_to_book/people` prior + curated overrides, then a gemini-2.5-flash fallback). Place relations are
-   themselves Layer-C-partial (only where the text states a location), and ~8% remain unresolved.
+   added in Stage XI** (Chapter 6): 176 gazetteer-resolved locations (lab `labgen` gazetteer; `code/hagdolim/places/`)
+   attached as **Layer-C-only** edges (766), 92% of place-references resolved. Disambiguation is **region-first**
+   (a generous Old-World country/lat-lon prior — the strongest signal ~95%, replacing the contaminated
+   attached-flag prior), then curated overrides, then a candidate-aware gemini-2.5-flash pass for within-region ties
+   (e.g. a Polish vs. Ukrainian town of the same name); an unresolved fallback handles the rest. Junk `'0'`-name
+   gazetteer rows and biblical allusions (e.g. "כעדן") are filtered. Place relations are themselves Layer-C-partial
+   (only where the text states a location), and ~8% remain unresolved. Ambiguous cases are logged for SME review in
+   `data/analysis/place_duplicates_review.csv`.
 2. **Layer B inflation.** Co-mention is a per-entry clique: one dense entry (Rambam's ~105 mentions) manufactures
    thousands of pairs. B is reported only as backdrop, with a clique down-weight available but not load-bearing here.
 3. **Layer C is partial and model-extracted.** It captures a relation only where the text states one, so absence of a

@@ -12,9 +12,13 @@
   graphLite: "data/graph/graph_lite.json"
 };
 
-const BUILD_VERSION = (typeof window !== "undefined" && window.__BUILD_VERSION__ && window.__BUILD_VERSION__ !== "__BUILD_VERSION__")
-  ? String(window.__BUILD_VERSION__)
-  : "dev";
+const BUILD_VERSION = (() => {
+  if (typeof window !== "undefined" && window.__BUILD_VERSION__) {
+    const raw = String(window.__BUILD_VERSION__).trim();
+    if (raw && raw !== "__BUILD_VERSION__") return raw;
+  }
+  return `dev-${Date.now()}`;
+})();
 
 function withBuildVersion(path) {
   if (typeof path !== "string") return path;
@@ -797,6 +801,19 @@ function activateTab(tab) {
   const panel = document.getElementById(`tab-${tab}`);
   if (panel) panel.classList.add("active");
   buildTabs();
+  if (tab === "geo") {
+    setTimeout(() => {
+      if (APP.map) {
+        APP.map.invalidateSize(true);
+        if (APP.mapMarkers?.getLayers().length) {
+          const bounds = L.latLngBounds(APP.mapMarkers.getLayers().map(layer => [layer.getLatLng().lat, layer.getLatLng().lng]));
+          if (bounds.isValid()) APP.map.fitBounds(bounds.pad(0.2));
+        }
+      } else {
+        drawGeo().catch(() => {});
+      }
+    }, 120);
+  }
 }
 
 function applyLanguage() {
@@ -1045,8 +1062,8 @@ function renderNodeTable() {
   });
 }
 
-async function loadGraphIfNeeded(mode = "lite") {
-  if (APP.gLoaded && APP.gMode === mode) return;
+async function loadGraphIfNeeded(mode = "lite", forceReload = false) {
+  if (APP.gLoaded && APP.gMode === mode && !forceReload) return;
 
   if (mode === "lite") {
     const t = await getText(DATA_PATHS.graphLite);
@@ -2361,8 +2378,9 @@ async function loadWikidataForEntity(entityId) {
 
 function initMap() {
   if (APP.map) return;
-  APP.map = L.map("geoMap").setView([32, 20], 2);
+  APP.map = L.map("geoMap", { zoomControl: true }).setView([32, 20], 2);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap" }).addTo(APP.map);
+  setTimeout(() => APP.map?.invalidateSize(true), 200);
 }
 
 function setGeoRecordsPanelVisible(visible) {
@@ -2431,7 +2449,8 @@ function openGeoPlaceDetails(placeId, placeEdges, forceOpenPanel = true) {
   renderGeoLinkedRecords(place, placeEdges);
 }
 
-function drawGeo() {
+async function drawGeo() {
+  await loadGraphIfNeeded(document.getElementById("dataMode")?.value || "lite", true);
   initMap();
   APP.map.invalidateSize(true);
   const selectedPreds = new Set(selValues("geoPredicateFilter"));
@@ -2440,8 +2459,7 @@ function drawGeo() {
   const overlayPreds = new Set(selValues("geoOverlayPredicate"));
 
   const pEdges = APP.gEdges.filter(e => e.subtype === "place" && (!selectedPreds.size || selectedPreds.has(e.predicate)));
-  const placeIds = new Set(pEdges.map(e => e.target));
-  const places = APP.gNodes.filter(n => placeIds.has(n.id) && kindOf(n) === "place" && n.lat && n.lon);
+  const places = APP.gNodes.filter(n => kindOf(n) === "place" && n.lat !== null && n.lat !== undefined && n.lon !== null && n.lon !== undefined && n.lat !== "" && n.lon !== "");
 
   if (APP.mapMarkers) APP.mapMarkers.clearLayers();
   if (APP.mapHeat) APP.map.removeLayer(APP.mapHeat);
@@ -2466,7 +2484,11 @@ function drawGeo() {
       APP.mapHeat = L.heatLayer(heat, { radius, blur: 18, maxZoom: 5 }).addTo(APP.map);
     }
   }
-  if (places.length) APP.map.fitBounds(L.latLngBounds(places.map(p => [num(p.lat), num(p.lon)])).pad(0.2));
+  if (places.length > 15) {
+    APP.map.setView([38, 22], 5);
+  } else if (places.length) {
+    APP.map.fitBounds(L.latLngBounds(places.map(p => [num(p.lat), num(p.lon)])).pad(0.3));
+  }
 
   if (overlay) {
     APP.mapOverlay = L.layerGroup().addTo(APP.map);
@@ -2647,7 +2669,7 @@ async function runValidation() {
   // Source text is lazy-loaded; verify reachability with a partial GET
   const srcOk = await fetch(withBuildVersion(DATA_PATHS.sourceText)).then(r => r.ok).catch(() => false);
   checks.push(["Source text (reachable)", srcOk]);
-  checks.push(["Node metrics rows == 5128", APP.nodes.length === 5128]);
+  checks.push(["Node metrics rows == 5124", APP.nodes.length === 5124]);
 
   await loadGraphIfNeeded("lite");
   checks.push(["Lite graph nodes == 5128", APP.gNodes.length === 5128]);
@@ -2821,13 +2843,25 @@ function wireEvents() {
     const msg = APP.lang === "he" ? "\u05d8וען גרף..." : "Loading graph...";
     if (!APP.gLoaded) showLoadingOverlay(msg);
     try {
-      await loadGraphIfNeeded(document.getElementById("dataMode").value);
-      drawGeo();
+      await drawGeo();
     } finally { hideLoadingOverlay(); }
   };
 
   document.getElementById("geoNetworkOverlay")?.addEventListener("change", (e) => {
     setGeoOverlayPredicateVisible(!!e.target.checked);
+    if (APP.gLoaded) drawGeo().catch(() => {});
+  });
+
+  document.getElementById("geoPredicateFilter")?.addEventListener("change", () => {
+    if (APP.gLoaded) drawGeo().catch(() => {});
+  });
+
+  document.getElementById("heatRadius")?.addEventListener("input", () => {
+    if (APP.gLoaded) drawGeo().catch(() => {});
+  });
+
+  document.getElementById("geoOverlayPredicate")?.addEventListener("change", () => {
+    if (APP.gLoaded) drawGeo().catch(() => {});
   });
 
   document.getElementById("runValidation").onclick = runValidation;

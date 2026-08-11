@@ -1,14 +1,14 @@
 # Shem HaGedolim KG — multiplex assembly summary
 
-nodes: 5,128  (declared 4,948 + 0 semantic-only + places)
-edges: 130,615  = A structure 15,285 + B association 103,608 + C semantic 11,033 + C-place 767   (43 self-loops dropped)
+nodes: 5,124  (declared 4,948 + 0 semantic-only + places)
+edges: 130,613  = A structure 15,285 + B association 103,608 + C semantic 11,033 + C-place 765   (43 self-loops dropped)
 
 ## node typology (4-way)
   III_book_entry         2,033
   II_person_external     632
   IV_book_external       799
   I_person_entry         1,484
-  V_place                180
+  V_place                176
 
 ## Layer-C typed-relation distribution (person/book; incl. symmetric expansion)
   cites            4,162
@@ -25,10 +25,10 @@ edges: 130,615  = A structure 15,285 + B association 103,608 + C semantic 11,033
   glossOn          20
 
 ## Layer-C place-relation distribution
-  printedIn        278
+  printedIn        277
   associatedWith   191
   rabbiOf          137
-  fromPlace        57
+  fromPlace        56
   livedIn          44
   traveledTo       26
   diedIn           20

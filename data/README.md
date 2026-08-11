@@ -9,8 +9,8 @@ and the graph itself. Snapshot prepared 2026-08-05.*
 
 We turned the **Hida's *Shem HaGedolim*** (ר' חיים יוסף דוד אזולאי, 1774) — a biographical-and-bibliographical
 dictionary of the Jewish scholarly tradition — into a **knowledge graph** and read it with network analysis. The
-graph has **5,128 nodes** (1,484 scholars and 2,033 books that have their own entries, plus 632 externally-mentioned
-scholars, 799 externally-mentioned books, and **180 places**) connected by **~130,000 edges** across a **three-layer
+graph has **5,124 nodes** (1,484 scholars and 2,033 books that have their own entries, plus 632 externally-mentioned
+scholars, 799 externally-mentioned books, and **176 places**) connected by **~130,000 edges** across a **three-layer
 "multiplex" model**: (A) *editorial placement* — whom the Hida discusses inside whose entry; (B) *co-mention* — who
 merely appears together; and (C) *stated typed relations* — the ~12,000 relationships the text actually asserts
 (*cites, authored, teacher-of, commentary-on, disputed-with, parent-of, contemporary-of, soul-root-of*, and place
