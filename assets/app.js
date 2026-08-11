@@ -2459,7 +2459,8 @@ async function drawGeo() {
   const overlayPreds = new Set(selValues("geoOverlayPredicate"));
 
   const pEdges = APP.gEdges.filter(e => e.subtype === "place" && (!selectedPreds.size || selectedPreds.has(e.predicate)));
-  const places = APP.gNodes.filter(n => kindOf(n) === "place" && n.lat !== null && n.lat !== undefined && n.lon !== null && n.lon !== undefined && n.lat !== "" && n.lon !== "");
+  const pEdgePlaceIds = selectedPreds.size ? new Set(pEdges.map(e => e.target)) : null;
+  const places = APP.gNodes.filter(n => kindOf(n) === "place" && n.lat !== null && n.lat !== undefined && n.lon !== null && n.lon !== undefined && n.lat !== "" && n.lon !== "" && (!pEdgePlaceIds || pEdgePlaceIds.has(n.id)));
 
   if (APP.mapMarkers) APP.mapMarkers.clearLayers();
   if (APP.mapHeat) APP.map.removeLayer(APP.mapHeat);
